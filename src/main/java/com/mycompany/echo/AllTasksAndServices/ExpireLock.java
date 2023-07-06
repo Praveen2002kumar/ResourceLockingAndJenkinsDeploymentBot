@@ -28,27 +28,31 @@ public class ExpireLock {
     @Scheduled(fixedDelay = 1000)
     public void deleteExpireLocks() {
 
-        List<LockedResourceModel> list = lockedResourceRepo.findAll();
-        for (LockedResourceModel lockedResourceModel : list) {
+        try{
+            List<LockedResourceModel> list = lockedResourceRepo.findAll();
+            for (LockedResourceModel lockedResourceModel : list) {
 
-            LocalDateTime time = lockedResourceModel.getExpiretime();
-            if (time == null) time = LocalDateTime.now();
-            LocalDateTime currenttime = LocalDateTime.now();
-            if (time.isBefore(currenttime)) {
+                LocalDateTime time = lockedResourceModel.getExpiretime();
+                if (time == null) time = LocalDateTime.now();
+                LocalDateTime currenttime = LocalDateTime.now();
+                if (time.isBefore(currenttime)) {
 
 
-                String text = "Your lock for resource : " + lockedResourceModel.getResource() + " has expired";
-                System.out.println(lockedResourceModel.getResource());
+                    String text = "Your lock for resource : " + lockedResourceModel.getResource() + " has expired";
+                    System.out.println(lockedResourceModel.getResource());
 
-                String ownerEmail = lockedResourceModel.getUseremail();
-                List<TurnContext> contexts = allContext.getContext(ownerEmail);
-                for (TurnContext context : contexts) {
-                    alertCard.showAlert("🚨🚨🚨🚨Alert", text, context);
+                    String ownerEmail = lockedResourceModel.getUseremail();
+                    List<TurnContext> contexts = allContext.getContext(ownerEmail);
+                    for (TurnContext context : contexts) {
+                        alertCard.showAlert("🚨🚨🚨🚨Alert", text, context);
+                    }
+
+
+                    lockedResourceRepo.deleteById(lockedResourceModel.getId());
                 }
-
-
-                lockedResourceRepo.deleteById(lockedResourceModel.getId());
             }
+        }catch (NullPointerException e){
+
         }
     }
 
