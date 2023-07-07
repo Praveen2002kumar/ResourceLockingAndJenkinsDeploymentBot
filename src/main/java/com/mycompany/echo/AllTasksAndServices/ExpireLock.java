@@ -29,8 +29,8 @@ public class ExpireLock {
     public void deleteExpireLocks() {
 
         try{
-            List<LockedResourceModel> list = lockedResourceRepo.findAll();
-            for (LockedResourceModel lockedResourceModel : list) {
+            List<LockedResourceModel> lockedResources = lockedResourceRepo.findAll();
+            for (LockedResourceModel lockedResourceModel : lockedResources) {
 
                 LocalDateTime time = lockedResourceModel.getExpiretime();
                 if (time == null) time = LocalDateTime.now();
