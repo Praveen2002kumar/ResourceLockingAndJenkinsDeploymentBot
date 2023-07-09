@@ -32,7 +32,6 @@ import java.util.concurrent.CompletableFuture;
 public class EchoBot extends ActivityHandler {
 
 
-
     @Autowired
     ResourceRepository resourceRepository;
 
@@ -70,13 +69,27 @@ public class EchoBot extends ActivityHandler {
     @Autowired
     ConsumeContext consumeContext;
 
+    @Autowired
+    StatusWithBuildNumber statusWithBuildNumber;
+
+    @Autowired
+    BuildJobForm buildJobForm;
+
+    @Autowired
+    ReceiveBuildParameters receiveBuildParameters;
+
 
     @Override
     protected CompletableFuture<Void> onMessageActivity(TurnContext turnContext) {
+        String messageToUser = "help : all commands";
+        if (turnContext.getActivity().getText() == null && turnContext.getActivity().isType(ActivityTypes.MESSAGE)) {
+           messageToUser=receiveBuildParameters.getReceive(turnContext);
+            Activity reply = MessageFactory.text(messageToUser);
+           return turnContext.sendActivity(reply).thenApply(resourceResponse -> null);
+        }
+
 
         consumeContext.getConsume(turnContext);
-
-
         String input = turnContext.getActivity().getText();
         StringTokenizer tokenizer = new StringTokenizer(input);
 
@@ -87,19 +100,11 @@ public class EchoBot extends ActivityHandler {
         }
 
 
-        String messageToUser = "command not found";
-
         try {
             if (list.get(0).equals("hi")) {
                 messageToUser = "Hi! " + turnContext.getActivity().getFrom().getName();
-            } else if (list.get(1).equals("status")) {
-                messageToUser = jenkinJobInfoService.getJobInfo(list.get(0));
-
             } else if (list.get(0).equals("all") && list.get(1).equals("resources")) {
                 messageToUser = allResources.getAllResources();
-            } else if (list.get(1).equals("build")) {
-                messageToUser = jenkinJobBuild.triggerJob(list, turnContext.getActivity().getFrom().getId());
-
             } else if (list.get(0).equals("add") && list.get(1).equals("resource")) {
                 messageToUser = adminAddedResources.addResource(list.get(2), turnContext);
             } else if (list.get(0).equals("lock") && list.get(1).equals("resource")) {
@@ -122,10 +127,17 @@ public class EchoBot extends ActivityHandler {
 
             } else if (list.get(0).equals("all") && list.get(1).equals("commands")) {
                 messageToUser = allCommands.getCommnds();
+            } else if (list.get(0).equals("get") && list.get(1).equals("status")) {
+                messageToUser = statusWithBuildNumber.getStatus(list.get(2), list.get(3), turnContext);
+            } else if (list.get(0).equals("myjob") && list.get(1).equals("status")) {
+
+            }else if(list.get(0).equals("build")&& list.get(1).equals("job")){
+                buildJobForm.getForm(turnContext);
+                messageToUser="fill this form";
             }
         } catch (IndexOutOfBoundsException | NullPointerException e) {
             System.out.println(e);
-        } catch (JsonProcessingException | InterruptedException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

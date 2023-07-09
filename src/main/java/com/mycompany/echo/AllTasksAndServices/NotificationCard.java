@@ -14,7 +14,7 @@ public class NotificationCard {
   public void getCard(Long time,String senderemail,String resource,TurnContext turnContext){
 
       HeroCard card = new HeroCard();
-      card.setTitle("🔔🔔🔔🔔Notification");
+      card.setTitle("🔔🔔🔔🔔Request Notification");
       String text="Send by : "+senderemail+" , Required resource : "+resource+" , For time : "+time;
       card.setText(text);
 

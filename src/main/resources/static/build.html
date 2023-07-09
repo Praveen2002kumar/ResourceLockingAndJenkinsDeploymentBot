@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+    body {
+      background-color: #f2f2f2;
+    }
+
+    .container {
+      width: 50%;
+      margin: 0 auto;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+    <h1>Build information</h1>
+    <form action="/build" method="POST">
+        <div class="form-group">
+            <label for="chart_name">Chart Name:</label>
+            <input type="text" id="chart_name" name="chart_name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="chart_release_name">Chart Release Name:</label>
+            <input type="text" id="chart_release_name" name="chart_release_name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="branch">Branch:</label>
+            <input type="text" id="branch" name="branch" required>
+        </div>
+
+        <div class="form-group">
+            <label for="mode">Mode:</label>
+            <select id="mode" name="mode" required>
+                <option value="">Select mode</option>
+                <option value="Production">Production</option>
+                <option value="Development">Development</option>
+                <option value="Testing">Testing</option>
+            </select>
+        </div>
+
+        <button type="submit">Build</button>
+    </form>
+</div>
+</body>
+</html>

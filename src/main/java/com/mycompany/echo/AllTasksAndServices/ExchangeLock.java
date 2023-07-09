@@ -5,7 +5,9 @@ import com.microsoft.bot.builder.teams.TeamsInfo;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.teams.TeamsChannelAccount;
 import com.mycompany.echo.AllModels.AllContext;
+import com.mycompany.echo.AllModels.ExpireLockNotificationModel;
 import com.mycompany.echo.AllModels.LockedResourceModel;
+import com.mycompany.echo.AllRepositories.ExpireLockNotificationRepo;
 import com.mycompany.echo.AllRepositories.LockedResourceRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,15 @@ public class ExchangeLock {
 
     @Autowired
     LockedResourceRepo lockedResourceRepo;
+
+    @Autowired
+    ExpireLockNotificationModel expireLockNotificationModel;
+
+    @Autowired
+    ExpireLockNotificationRepo expireLockNotificationRepo;
+
+    @Autowired
+    ConvertUTCToIST convertUTCToIST;
 
     public String getExchange(String senderemail, String resource, TurnContext turnContext, String timeString) {
         long time;
@@ -53,8 +64,13 @@ public class ExchangeLock {
         lockedResourceModel.setResource(resource);
         lockedResourceModel.setExpiretime(LocalDateTime.now().plusMinutes(time));
         lockedResourceRepo.save(lockedResourceModel);
+        if(expireLockNotificationRepo.findByResource(resource)!=null)expireLockNotificationRepo.deleteById(expireLockNotificationRepo.findByResource(resource).getId());
+        expireLockNotificationModel.setExpiretime(LocalDateTime.now().plusMinutes(time));
+        expireLockNotificationModel.setUseremail(senderemail);
+        expireLockNotificationModel.setResource(resource);
+        expireLockNotificationRepo.save(expireLockNotificationModel);
         for (TurnContext context : list) {
-            alertCard.showAlert("🔔🔔🔔🔔Notification", "Lock for resource : " + lockedResourceModel.getResource() + " has been granted to you : ", context);
+            alertCard.showAlert("🔔🔔🔔🔔Notification", "Lock for resource : " + lockedResourceModel.getResource() + " has been granted to you , Expire at : "+convertUTCToIST.getIST(LocalDateTime.now().plusMinutes(time)), context);
         }
         return "Successfully granted lock to : " + senderemail;
 

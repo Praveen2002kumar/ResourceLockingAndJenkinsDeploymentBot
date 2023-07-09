@@ -25,7 +25,7 @@ public class ExpireLock {
     @Autowired
     AllContext allContext;
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 5000)
     public void deleteExpireLocks() {
 
         try{
@@ -35,6 +35,7 @@ public class ExpireLock {
                 LocalDateTime time = lockedResourceModel.getExpiretime();
                 if (time == null) time = LocalDateTime.now();
                 LocalDateTime currenttime = LocalDateTime.now();
+
                 if (time.isBefore(currenttime)) {
 
 
@@ -44,7 +45,7 @@ public class ExpireLock {
                     String ownerEmail = lockedResourceModel.getUseremail();
                     List<TurnContext> contexts = allContext.getContext(ownerEmail);
                     for (TurnContext context : contexts) {
-                        alertCard.showAlert("🚨🚨🚨🚨Alert", text, context);
+                        alertCard.showAlert("🔔🔔🔔🔔Expire Notificaiton", text, context);
                     }
 
 

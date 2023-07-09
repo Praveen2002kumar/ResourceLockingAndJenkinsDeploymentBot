@@ -4,7 +4,9 @@ import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.builder.teams.TeamsInfo;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.teams.TeamsChannelAccount;
+import com.mycompany.echo.AllModels.ExpireLockNotificationModel;
 import com.mycompany.echo.AllModels.LockedResourceModel;
+import com.mycompany.echo.AllRepositories.ExpireLockNotificationRepo;
 import com.mycompany.echo.AllRepositories.LockedResourceRepo;
 import com.mycompany.echo.AllRepositories.ResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,12 @@ public class ResourceLocking {
 
     @Autowired
     LockedResourceModel lockedResourceModel;
+
+    @Autowired
+    ExpireLockNotificationRepo expireLockNotificationRepo;
+
+    @Autowired
+    ExpireLockNotificationModel expireLockNotificationModel;
 
 
 
@@ -60,6 +68,11 @@ public class ResourceLocking {
           lockedResourceModel.setResource(resource);
           lockedResourceModel.setExpiretime(currenttime.plusMinutes(minutes));
           lockedResourceRepo.save(lockedResourceModel);
+
+          expireLockNotificationModel.setExpiretime(currenttime.plusMinutes(minutes));
+          expireLockNotificationModel.setUseremail(useremail);
+          expireLockNotificationModel.setResource(resource);
+          expireLockNotificationRepo.save(expireLockNotificationModel);
          return "successfully locked the resource";
         } catch (NullPointerException e){
             System.out.println(e);

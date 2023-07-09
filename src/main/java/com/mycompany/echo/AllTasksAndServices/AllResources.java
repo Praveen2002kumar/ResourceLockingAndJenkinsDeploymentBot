@@ -15,7 +15,7 @@ public class AllResources {
         StringBuilder messageToUser= new StringBuilder("Available resources" + "\n\n");
         List<ResourceModel> allresource=resourceRepository.findAll();
         for (ResourceModel resourceModel : allresource) {
-            messageToUser.append(resourceModel.getResourcename()).append(" Added By : ").append(resourceModel.getEmail());
+            messageToUser.append(resourceModel.getResourcename());
             messageToUser.append("\n\n");
         }
         return messageToUser.toString();

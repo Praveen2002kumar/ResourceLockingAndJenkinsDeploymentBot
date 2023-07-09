@@ -4,7 +4,9 @@ import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.builder.teams.TeamsInfo;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.teams.TeamsChannelAccount;
+import com.mycompany.echo.AllModels.ExpireLockNotificationModel;
 import com.mycompany.echo.AllModels.LockedResourceModel;
+import com.mycompany.echo.AllRepositories.ExpireLockNotificationRepo;
 import com.mycompany.echo.AllRepositories.LockedResourceRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,9 +19,15 @@ public class IncreaseLock {
     @Autowired
     LockedResourceRepo lockedResourceRepo;
 
+   @Autowired
+    ExpireLockNotificationModel expireLockNotificationModel;
+
+   @Autowired
+    ExpireLockNotificationRepo expireLockNotificationRepo;
+
     public String getIncrease(String operation,String resource, String timeString, TurnContext turnContext){
 
-
+      String response="response";
         LockedResourceModel lockedResource = lockedResourceRepo.findByResource(resource);
 
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
@@ -35,18 +43,21 @@ public class IncreaseLock {
                 LocalDateTime finaltime = LocalDateTime.now();
                 if (operation.equals("inc")) {
                     finaltime = oldExpireTime.plusMinutes(minutes);
-                    lockedResource.setExpiretime(finaltime);
-                    lockedResourceRepo.deleteById(lockedResource.getId());
-                    lockedResourceRepo.save(lockedResource);
-                    return  "successfully increase time on lock";
+                    response= "successfully increase time on lock";
                 } else {
                     finaltime = oldExpireTime.minusMinutes(minutes);
-                    lockedResource.setExpiretime(finaltime);
-                    lockedResourceRepo.deleteById(lockedResource.getId());
-                    lockedResourceRepo.save(lockedResource);
-                    return "successfully decrease time on lock";
+                   response= "successfully decrease time on lock";
                 }
+                lockedResource.setExpiretime(finaltime);
+                lockedResourceRepo.deleteById(lockedResource.getId());
+                lockedResourceRepo.save(lockedResource);
 
+                if(expireLockNotificationRepo.findByResource(resource)!=null)expireLockNotificationRepo.deleteById(expireLockNotificationRepo.findByResource(resource).getId());
+                expireLockNotificationModel.setResource(resource);
+                expireLockNotificationModel.setUseremail(lockedResource.getUseremail());
+                expireLockNotificationModel.setExpiretime(finaltime);
+                expireLockNotificationRepo.save(expireLockNotificationModel);
+           return response;
 
             } catch (NumberFormatException e) {
                 System.out.println(e);

@@ -10,6 +10,7 @@ import com.microsoft.bot.integration.Configuration;
 import com.microsoft.bot.integration.spring.BotController;
 import com.microsoft.bot.integration.spring.BotDependencyConfiguration;
 import com.mycompany.echo.AllRepositories.LockedResourceRepo;
+import com.mycompany.echo.AllTasksAndServices.BeforeExpireNotification;
 import com.mycompany.echo.AllTasksAndServices.EchoBot;
 
 import org.springframework.boot.SpringApplication;

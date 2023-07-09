@@ -1,6 +1,9 @@
 package com.mycompany.echo.AllTasksAndServices;
 
+import com.microsoft.bot.builder.TurnContext;
+import com.mycompany.echo.AllModels.QueueJobModel;
 import com.mycompany.echo.AllRepositories.LockedResourceRepo;
+import com.mycompany.echo.AllRepositories.QueueJobRepo;
 import com.mycompany.echo.AllRepositories.ResourceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -9,8 +12,11 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class JenkinJobBuild {
@@ -21,13 +27,25 @@ public class JenkinJobBuild {
     @Autowired
     LockedResourceRepo lockedResourceRepo;
 
-    public String triggerJob(List<String> list, String uniqueid) throws InterruptedException {
-//        String jenkinsUrl = "http://localhost:8080";
-        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
-//        String username = "Praveen_Kumar";
-        String username="praveen.kumar@sprinklr.com";
-//        String password = "11526c2640716f0683072286fe8c801ae5";
-        String password="11cac87e679a977391343de33757fdf4ae";
+    @Autowired
+    BuildNumberByQueueId buildNumberByQueueId;
+
+    @Autowired
+    TriggerJobStatus triggerJobStatus;
+
+    @Autowired
+    QueueJobRepo queueJobRepo;
+
+    @Autowired
+    QueueJobModel queueJobModel;
+
+    public String triggerJob(String jobName,String chart_name,String release_name,String branch,String mode, TurnContext turnContext) throws InterruptedException {
+        String jenkinsUrl = "http://localhost:8080";
+//        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
+        String username = "Praveen_Kumar";
+//        String username="praveen.kumar@sprinklr.com";
+        String password = "11526c2640716f0683072286fe8c801ae5";
+//        String password="11cac87e679a977391343de33757fdf4ae";
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
 
@@ -42,94 +60,52 @@ public class JenkinJobBuild {
 
         // Trigger the build
         try {
-            String jobName = list.get(0);
-            StringBuilder apiUrl = new StringBuilder(jenkinsUrl + "/job/" + list.get(0) + "/buildWithParameters");
-            for (int i = 2; i < list.size(); i += 2) {
-                if (i == 2) apiUrl.append('?');
-                apiUrl.append(list.get(i));
-                apiUrl.append('=');
-//                System.out.println(uniqueid);
-//                System.out.println(lockedResourceRepo.findByResource(list.get(i+1)).getUniqueid());
 
-//                if (resourceRepository.findByResourcename(list.get(i + 1)) == null)
-//                    return list.get(i + 1) + "resource not found";
-//                if (lockedResourceRepo.findByResource(list.get(i + 1)) != null && !lockedResourceRepo.findByResource(list.get(i + 1)).getUniqueid().equals(uniqueid))
-//                    return list.get(i + 1) + " resource is already locked";
-//                if (lockedResourceRepo.findByResource(list.get(i + 1)) == null || !lockedResourceRepo.findByResource(list.get(i + 1)).getUniqueid().equals(uniqueid))
-//                    return list.get(i + 1) + " this resource is not locked by you";
-                apiUrl.append(list.get(i + 1));
 
-                apiUrl.append('&');
-            }
-
+            StringBuilder apiUrl = new StringBuilder(jenkinsUrl + "/job/" + jobName + "/buildWithParameters");
+            apiUrl.append("?chart_name=").append(chart_name);
+            apiUrl.append("&release_name=").append(release_name);
+            apiUrl.append("&branch=").append(branch);
+            apiUrl.append("&mode=").append(mode);
+            String resource = chart_name + " " + release_name;
 
             ResponseEntity<String> triggerResponse = restTemplate.exchange(apiUrl.toString(), HttpMethod.POST, new HttpEntity<>(headers), String.class);
 
             // Extract the Location header from the response
-            String locationHeader = triggerResponse.getHeaders().getFirst("Location");
 
-            // Extract the queue item ID from the Location header
-            String itemId = extractItemIdFromLocationHeader(locationHeader);
+            if (triggerResponse.getStatusCode().is2xxSuccessful()) {
+                String locationHeader = triggerResponse.getHeaders().getFirst("Location");
 
-            System.out.println("Queue Item ID: " + itemId);
+                // Extract the queue item ID from the Location header
+                String itemId = extractItemIdFromLocationHeader(locationHeader);
 
-            boolean itemInQueue = true;
-            while (true) {
-                // Get the queue item status
-                String queueItemUrl = jenkinsUrl + "/queue/item/" + itemId+ "/api/json";
-                ResponseEntity<String> queueItemResponse = restTemplate.exchange(queueItemUrl, HttpMethod.GET, new HttpEntity<>(headers), String.class);
-                String queueItemStatus = queueItemResponse.getBody();
+                queueJobModel.setJobname(jobName);
+                queueJobModel.setQueuid(itemId);
+                queueJobModel.setTriggertime(LocalDateTime.now());
+                queueJobRepo.save(queueJobModel);
 
-                // Check if the item is still in the queue
-                if (queueItemStatus.contains("\"why\":null")) {
-                    Thread.sleep(300000); // Wait for 5 min before checking again
-                } else {
+                Long buildNumberLong = buildNumberByQueueId.getBuildNumber(itemId, jobName);
 
-                    String buildUrl1 = jenkinsUrl + "/job/" + jobName + "/api/json";
-                    ResponseEntity<String> buildNumberResponse = restTemplate.exchange(buildUrl1, HttpMethod.GET, new HttpEntity<>(headers), String.class);
-                    String buildNumber = extractBuildNumber(buildNumberResponse.getBody()) ;
-                    long buildNumberLong=Long.parseLong(buildNumber);
+                triggerJobStatus.getStatus(jobName, itemId, buildNumberLong, turnContext);
+                System.out.println("Queue Item ID: " + itemId);
+                buildNumberLong++;
+                String url = jenkinsUrl + "/job/" + jobName + "/" + buildNumberLong;
+                String markdownLink = "[" + "CheckStatus" + "](" + url + ")";
 
+                String responseMessage = markdownLink;
 
-                    String buildUrl2 = jenkinsUrl + "/job/" + jobName + "/" + buildNumberLong + "/api/json";
-                    ResponseEntity<String> statusResponse = restTemplate.exchange(buildUrl2, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+                return responseMessage + " " + "Triggered Successfully";
 
-                    // Extract the build status from the response
-                    String buildStatus = extractBuildStatus(statusResponse.getBody());
-
-//                    System.out.println("Build Status: " + buildStatus);
-
-                    itemInQueue = false;
-                    String linkText = "CheckStatus";
-                    buildNumberLong++;
-//                    String url = "http://localhost:8080/job/" + jobName + "/" +buildNumberLong;
-                     String url="https://qa4-build.sprinklr.com/jenkins/job/"+jobName+"/"+buildNumberLong;
-                    String markdownLink = "[" + linkText + "](" + url + ")";
-
-                    String responseMessage = markdownLink + " " + buildStatus;
-
-                    return responseMessage;
-                }
             }
+
         } catch (HttpClientErrorException | IndexOutOfBoundsException e) {
             System.out.println(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return "Job not found";
     }
 
-    private String extractBuildStatus(String statusResponse) {
-
-        return statusResponse.contains("\"result\":\"SUCCESS\"") ? "SUCCESS" : "FAILURE";
-    }
-
-    private String extractBuildNumber(String statusResponse) {
-        // Parse the build response JSON and extract the build number field
-        // You can use a JSON parsing library like Jackson or Gson for this task
-        // Here's a simple example assuming the build response is in a known format
-        // Adapt the code based on the actual structure of the build response
-        // For example, if the build response contains a field named "number", you can directly extract it
-        return statusResponse.contains("\"number\":") ? statusResponse.split("\"number\":")[1].split(",")[0].trim() : "";
-    }
 
     private String extractItemIdFromLocationHeader(String locationHeader) {
 
