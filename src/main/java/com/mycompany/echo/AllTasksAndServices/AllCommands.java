@@ -1,7 +1,4 @@
 package com.mycompany.echo.AllTasksAndServices;
-
-import com.microsoft.bot.builder.TurnContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component

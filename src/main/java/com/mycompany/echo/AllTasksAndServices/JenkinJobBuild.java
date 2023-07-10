@@ -14,18 +14,9 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class JenkinJobBuild {
-
-    @Autowired
-    ResourceRepository resourceRepository;
-
-    @Autowired
-    LockedResourceRepo lockedResourceRepo;
 
     @Autowired
     BuildNumberByQueueId buildNumberByQueueId;
@@ -40,12 +31,12 @@ public class JenkinJobBuild {
     QueueJobModel queueJobModel;
 
     public String triggerJob(String jobName,String chart_name,String release_name,String branch,String mode, TurnContext turnContext) throws InterruptedException {
-        String jenkinsUrl = "http://localhost:8080";
-//        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
-        String username = "Praveen_Kumar";
-//        String username="praveen.kumar@sprinklr.com";
-        String password = "11526c2640716f0683072286fe8c801ae5";
-//        String password="11cac87e679a977391343de33757fdf4ae";
+//        String jenkinsUrl = "http://localhost:8080";
+        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
+//        String username = "Praveen_Kumar";
+        String username="praveen.kumar@sprinklr.com";
+//        String password = "11526c2640716f0683072286fe8c801ae5";
+        String password="11cac87e679a977391343de33757fdf4ae";
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
 
@@ -63,10 +54,14 @@ public class JenkinJobBuild {
 
 
             StringBuilder apiUrl = new StringBuilder(jenkinsUrl + "/job/" + jobName + "/buildWithParameters");
-            apiUrl.append("?chart_name=").append(chart_name);
-            apiUrl.append("&release_name=").append(release_name);
-            apiUrl.append("&branch=").append(branch);
-            apiUrl.append("&mode=").append(mode);
+            if(chart_name!=null)
+            apiUrl.append("?CHART_NAME=").append(chart_name);
+            if(release_name!=null)
+            apiUrl.append("&CHART_RELEASE_NAME=").append(release_name);
+            if(branch!=null)
+            apiUrl.append("&CHART_REPO_BRANCH=").append(branch);
+            if(mode!=null)
+            apiUrl.append("&JOB_MODE=").append(mode);
             String resource = chart_name + " " + release_name;
 
             ResponseEntity<String> triggerResponse = restTemplate.exchange(apiUrl.toString(), HttpMethod.POST, new HttpEntity<>(headers), String.class);
@@ -79,14 +74,9 @@ public class JenkinJobBuild {
                 // Extract the queue item ID from the Location header
                 String itemId = extractItemIdFromLocationHeader(locationHeader);
 
-                queueJobModel.setJobname(jobName);
-                queueJobModel.setQueuid(itemId);
-                queueJobModel.setTriggertime(LocalDateTime.now());
-                queueJobRepo.save(queueJobModel);
 
                 Long buildNumberLong = buildNumberByQueueId.getBuildNumber(itemId, jobName);
-
-                triggerJobStatus.getStatus(jobName, itemId, buildNumberLong, turnContext);
+                 triggerJobStatus.getStatus(jobName, itemId, buildNumberLong, turnContext);
                 System.out.println("Queue Item ID: " + itemId);
                 buildNumberLong++;
                 String url = jenkinsUrl + "/job/" + jobName + "/" + buildNumberLong;

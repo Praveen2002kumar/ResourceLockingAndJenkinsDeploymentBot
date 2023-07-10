@@ -42,12 +42,12 @@ public class BuildJobForm {
                 "    {\n" +
                 "      \"type\": \"Input.Text\",\n" +
                 "      \"id\": \"branch\",\n" +
-                "      \"placeholder\": \"BRANCH\"\n" +
+                "      \"placeholder\": \"CHART_REPO_BRANCH\"\n" +
                 "    },\n" +
                 "    {\n" +
                 "      \"type\": \"Input.Text\",\n" +
                 "      \"id\": \"mode\",\n" +
-                "      \"placeholder\": \"MODE\"\n" +
+                "      \"placeholder\": \"JOB_MODE\"\n" +
                 "    }\n" +
                 "  ],\n" +
                 "  \"actions\": [\n" +

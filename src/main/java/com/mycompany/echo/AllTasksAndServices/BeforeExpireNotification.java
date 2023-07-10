@@ -3,9 +3,7 @@ package com.mycompany.echo.AllTasksAndServices;
 import com.microsoft.bot.builder.TurnContext;
 import com.mycompany.echo.AllModels.AllContext;
 import com.mycompany.echo.AllModels.ExpireLockNotificationModel;
-import com.mycompany.echo.AllModels.LockedResourceModel;
 import com.mycompany.echo.AllRepositories.ExpireLockNotificationRepo;
-import com.mycompany.echo.AllRepositories.LockedResourceRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -18,9 +16,6 @@ public class BeforeExpireNotification {
 
     @Autowired
     ExpireLockNotificationRepo expireLockNotificationRepo;
-
-    @Autowired
-    ExpireLockNotificationModel expireLockNotificationModel;
 
     @Autowired
     AlertCard alertCard;

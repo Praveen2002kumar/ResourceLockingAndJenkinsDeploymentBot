@@ -4,7 +4,6 @@
 package com.mycompany.echo.AllTasksAndServices;
 
 import com.codepoetics.protonpack.collectors.CompletableFutures;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.microsoft.bot.builder.ActivityHandler;
 import com.microsoft.bot.builder.MessageFactory;
 import com.microsoft.bot.builder.TurnContext;
@@ -39,13 +38,7 @@ public class EchoBot extends ActivityHandler {
     AllResources allResources;
 
     @Autowired
-    JenkinJobBuild jenkinJobBuild;
-
-    @Autowired
     ResourceLocking resourceLocking;
-
-    @Autowired
-    JenkinJobInfoService jenkinJobInfoService;
 
 
     @Autowired
@@ -79,13 +72,19 @@ public class EchoBot extends ActivityHandler {
     ReceiveBuildParameters receiveBuildParameters;
 
 
+    @Autowired
+    UserSpecificBuildsStatus userSpecificBuildsStatus;
+
+    @Autowired
+    Abortjob abortjob;
+
     @Override
     protected CompletableFuture<Void> onMessageActivity(TurnContext turnContext) {
         String messageToUser = "help : all commands";
-        if (turnContext.getActivity().getText() == null && turnContext.getActivity().isType(ActivityTypes.MESSAGE)) {
-           messageToUser=receiveBuildParameters.getReceive(turnContext);
+        if (turnContext.getActivity().isType(ActivityTypes.MESSAGE)&&turnContext.getActivity().getText() == null) {
+            messageToUser = receiveBuildParameters.getReceive(turnContext);
             Activity reply = MessageFactory.text(messageToUser);
-           return turnContext.sendActivity(reply).thenApply(resourceResponse -> null);
+            return turnContext.sendActivity(reply).thenApply(resourceResponse -> null);
         }
 
 
@@ -93,47 +92,52 @@ public class EchoBot extends ActivityHandler {
         String input = turnContext.getActivity().getText();
         StringTokenizer tokenizer = new StringTokenizer(input);
 
-        List<String> list = new ArrayList<>();
+        List<String> userInput = new ArrayList<>();
         while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken();
-            list.add(token);
+            userInput.add(token);
         }
 
 
         try {
-            if (list.get(0).equals("hi")) {
+            if (userInput.get(0).equals("hi")) {
                 messageToUser = "Hi! " + turnContext.getActivity().getFrom().getName();
-            } else if (list.get(0).equals("all") && list.get(1).equals("resources")) {
+            } else if (userInput.get(0).equals("all") && userInput.get(1).equals("resources")) {
                 messageToUser = allResources.getAllResources();
-            } else if (list.get(0).equals("add") && list.get(1).equals("resource")) {
-                messageToUser = adminAddedResources.addResource(list.get(2), turnContext);
-            } else if (list.get(0).equals("lock") && list.get(1).equals("resource")) {
-                if (resourceRepository.findByResourcename(list.get(2)) == null) messageToUser = "Resource not found";
+            } else if (userInput.get(0).equals("add") && userInput.get(1).equals("resource")) {
+                messageToUser = adminAddedResources.addResource(userInput.get(2), turnContext);
+            } else if (userInput.get(0).equals("lock") && userInput.get(1).equals("resource")) {
+                if (resourceRepository.findByResourcename(userInput.get(2)) == null)
+                    messageToUser = "Resource not found";
 
-                messageToUser = resourceLocking.LockResource(list.get(2), list.get(3), turnContext);
+                messageToUser = resourceLocking.LockResource(userInput.get(2), userInput.get(3), turnContext);
 
-            } else if (list.get(0).equals("unlock") && list.get(1).equals("resource")) {
+            } else if (userInput.get(0).equals("unlock") && userInput.get(1).equals("resource")) {
 
-                messageToUser = resourceLocking.UnlockResource(list.get(2), turnContext);
+                messageToUser = resourceLocking.UnlockResource(userInput.get(2), turnContext);
 
-            } else if (list.get(0).equals("locked") && list.get(1).equals("resources")) {
+            } else if (userInput.get(0).equals("locked") && userInput.get(1).equals("resources")) {
                 messageToUser = allLockedResources.getLockedResources();
-            } else if (list.get(0).equals("grant") && list.get(1).equals("resource")) {
-                messageToUser = exchangeLock.getExchange(list.get(2), list.get(3), turnContext, list.get(4));
-            } else if (list.get(0).equals("remove") && list.get(1).equals("resource")) {
-                messageToUser = removeResource.getRemove(list.get(2), turnContext);
-            } else if ((list.get(0).equals("inc") || list.get(0).equals("dec")) && list.get(1).equals("lock")) {
-                messageToUser = increaseLock.getIncrease(list.get(0), list.get(2), list.get(3), turnContext);
+            } else if (userInput.get(0).equals("grant") && userInput.get(1).equals("resource")) {
+                messageToUser = exchangeLock.getExchange(userInput.get(2), userInput.get(3), turnContext, userInput.get(4));
+            } else if (userInput.get(0).equals("remove") && userInput.get(1).equals("resource")) {
+                messageToUser = removeResource.getRemove(userInput.get(2), turnContext);
+            } else if ((userInput.get(0).equals("inc") || userInput.get(0).equals("dec")) && userInput.get(1).equals("lock")) {
+                messageToUser = increaseLock.getIncrease(userInput.get(0), userInput.get(2), userInput.get(3), turnContext);
 
-            } else if (list.get(0).equals("all") && list.get(1).equals("commands")) {
+            } else if (userInput.get(0).equals("all") && userInput.get(1).equals("commands")) {
                 messageToUser = allCommands.getCommnds();
-            } else if (list.get(0).equals("get") && list.get(1).equals("status")) {
-                messageToUser = statusWithBuildNumber.getStatus(list.get(2), list.get(3), turnContext);
-            } else if (list.get(0).equals("myjob") && list.get(1).equals("status")) {
+            } else if (userInput.get(0).equals("get") && userInput.get(1).equals("status")) {
+                messageToUser = statusWithBuildNumber.getStatus(userInput.get(2), userInput.get(3), turnContext);
+            } else if (userInput.get(0).equals("myjob") && userInput.get(1).equals("status")) {
 
-            }else if(list.get(0).equals("build")&& list.get(1).equals("job")){
+            } else if (userInput.get(0).equals("build") && userInput.get(1).equals("job")) {
                 buildJobForm.getForm(turnContext);
-                messageToUser="fill this form";
+                messageToUser = "fill this form";
+            }else if(userInput.get(0).equals("mybuilds")&& userInput.get(1).equals("status")){
+                messageToUser=userSpecificBuildsStatus.getStatus(turnContext);
+            }else if(userInput.get(0).equals("abort")&& userInput.get(1).equals("job")){
+                messageToUser=abortjob.abortJob(userInput.get(2),userInput.get(3));
             }
         } catch (IndexOutOfBoundsException | NullPointerException e) {
             System.out.println(e);
