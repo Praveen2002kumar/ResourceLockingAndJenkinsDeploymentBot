@@ -30,11 +30,11 @@ public class JenkinJobBuild {
     UserBuildJobRepo userBuildJobRepo;
 
     public String triggerJob(String jobName, String chart_name, String release_name, String branch, String mode, TurnContext turnContext) throws InterruptedException {
-//        String jenkinsUrl = "http://localhost:8080";
+        String jenkinsUrl = "http://localhost:8080";
        
-//        String username = "Praveen_Kumar";
+        String username = "Praveen_Kumar";
         
-//        String password = "11526c2640716f0683072286fe8c801ae5";
+        String password = "11526c2640716f0683072286fe8c801ae5";
         
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
@@ -109,6 +109,10 @@ public class JenkinJobBuild {
 
         String[] parts = locationHeader.split("/");
         return parts[parts.length - 1];
+    }
+    private String extractUrl(String statusResponse) {
+
+        return statusResponse.contains("\"url\":") ? statusResponse.split("\"url\":")[1].split(",")[0].trim() : "";
     }
 
 }

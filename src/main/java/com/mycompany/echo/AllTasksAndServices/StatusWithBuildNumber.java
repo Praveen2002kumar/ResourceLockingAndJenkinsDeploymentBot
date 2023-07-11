@@ -16,11 +16,11 @@ public class StatusWithBuildNumber {
     AlertCard alertCard;
     public String getStatus(String jobName, String buildNumber, TurnContext turnContext){
 
-//        String jenkinsUrl = "http://localhost:8080";
+        String jenkinsUrl = "http://localhost:8080";
     
-//        String username = "Praveen_Kumar";
-        ;
-//        String password = "11526c2640716f0683072286fe8c801ae5";
+        String username = "Praveen_Kumar";
+
+        String password = "11526c2640716f0683072286fe8c801ae5";
       
 
        try{

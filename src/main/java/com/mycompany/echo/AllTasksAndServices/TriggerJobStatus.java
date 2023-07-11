@@ -27,11 +27,11 @@ public class TriggerJobStatus implements Runnable{
 
 
     public void run()  {
-//                String jenkinsUrl = "http://localhost:8080";
-     
-//        String username = "Praveen_Kumar";
+                String jenkinsUrl = "http://localhost:8080";
+
+        String username = "Praveen_Kumar";
        
-//        String password = "11526c2640716f0683072286fe8c801ae5";
+        String password = "11526c2640716f0683072286fe8c801ae5";
      
         RestTemplate restTemplate = new RestTemplate();
 

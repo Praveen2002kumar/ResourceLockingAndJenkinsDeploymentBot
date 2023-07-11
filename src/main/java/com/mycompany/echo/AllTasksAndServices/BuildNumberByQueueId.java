@@ -12,12 +12,12 @@ public class BuildNumberByQueueId {
 
     public long getBuildNumber(String queueId,String jobName) throws  Exception{
 
-//                String jenkinsUrl = "http://localhost:8080/";
-        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins/";
-//        String username = "Praveen_Kumar";
-        String username="praveen.kumar@sprinklr.com";
-//        String password = "11526c2640716f0683072286fe8c801ae5";
-        String password="11cac87e679a977391343de33757fdf4ae";
+                String jenkinsUrl = "http://localhost:8080/";
+//        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins/";
+        String username = "Praveen_Kumar";
+//        String username="praveen.kumar@sprinklr.com";
+        String password = "11526c2640716f0683072286fe8c801ae5";
+//        String password="11cac87e679a977391343de33757fdf4ae";
 
         RestTemplate restTemplate = new RestTemplate();
 

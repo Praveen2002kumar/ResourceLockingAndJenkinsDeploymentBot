@@ -18,11 +18,11 @@ import java.util.Base64;
 
 @Controller
 public class JenkinJobInfoService {
-    //        String jenkinsUrl = "http://localhost:8080";
+            String jenkinsUrl = "http://localhost:8080";
  
-    //        String username = "Praveen_Kumar";
+            String username = "Praveen_Kumar";
   
-    //        String password = "11526c2640716f0683072286fe8c801ae5";
+            String password = "11526c2640716f0683072286fe8c801ae5";
     
 
     public String getJobInfo(String JOB_NAME) throws JsonProcessingException {
