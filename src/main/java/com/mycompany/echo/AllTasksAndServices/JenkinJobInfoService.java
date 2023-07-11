@@ -19,11 +19,11 @@ import java.util.Base64;
 @Controller
 public class JenkinJobInfoService {
     //        String jenkinsUrl = "http://localhost:8080";
-    String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
+ 
     //        String username = "Praveen_Kumar";
-    String username="praveen.kumar@sprinklr.com";
+  
     //        String password = "11526c2640716f0683072286fe8c801ae5";
-    String password="11cac87e679a977391343de33757fdf4ae";
+    
 
     public String getJobInfo(String JOB_NAME) throws JsonProcessingException {
         String messageToUser = "Job Not Found";
