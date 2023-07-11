@@ -23,12 +23,12 @@ public class Abortjob {
 
 
     StringBuilder responseStatus= new StringBuilder("job not found");
-    //        String jenkinsUrl = "http://localhost:8080";
-    String JENKINS_URL="https://qa4-build.sprinklr.com/jenkins";
-    //        String username = "Praveen_Kumar";
-    String USERNAME="praveen.kumar@sprinklr.com";
-    //        String password = "11526c2640716f0683072286fe8c801ae5";
-    String PASSWORD="11cac87e679a977391343de33757fdf4ae";
+            String JENKINS_URL = "http://localhost:8080";
+//    String JENKINS_URL="https://qa4-build.sprinklr.com/jenkins";
+            String USERNAME = "Praveen_Kumar";
+//    String USERNAME="praveen.kumar@sprinklr.com";
+            String PASSWORD = "11526c2640716f0683072286fe8c801ae5";
+//    String PASSWORD="11cac87e679a977391343de33757fdf4ae";
 
     public String abortJob(String JOB_NAME,String builNumber) {
         String messageToUser = "job not found";
@@ -51,6 +51,7 @@ public class Abortjob {
             }
         } catch (HttpClientErrorException e) {
             System.out.println(e);
+
         }
         return messageToUser;
     }

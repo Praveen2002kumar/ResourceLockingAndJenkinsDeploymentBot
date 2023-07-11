@@ -22,11 +22,13 @@ import java.util.List;
 
 @Component
 public class UserSpecificBuildsStatus {
-    @Autowired
-    TimeStampConversion timeStampConversion;
+
 
     @Autowired
     UserBuildJobRepo userBuildJobRepo;
+
+    @Autowired
+    ConvertUTCToIST convertUTCToIST;
 
 
     public String getStatus(TurnContext turnContext){
@@ -37,7 +39,7 @@ public class UserSpecificBuildsStatus {
         String response="Your all builds job status";
         response+="\n\n";
         for(UserBuildJobModel userbuild:userBuilds){
-            response+="JobName : "+userbuild.getJobname()+" , Status : "+userbuild.getStatus()+" , "+userbuild.getUrl();
+            response+="JobName : "+userbuild.getJobname()+" , TriggeredAt : "+convertUTCToIST.getIST(userbuild.getTriggertime())+" , "+userbuild.getUrl();
             response+="\n\n";
         }
         return response;

@@ -12,9 +12,17 @@ public class UserBuildJobModel {
     @Id
     private String id;
     private String jobname;
-    private String status;
+    private LocalDateTime triggertime;
     private String url;
     private String email;
+
+    public LocalDateTime getTriggertime() {
+        return triggertime;
+    }
+
+    public void setTriggertime(LocalDateTime triggertime) {
+        this.triggertime = triggertime;
+    }
 
     public String getId() {
         return id;
@@ -32,13 +40,6 @@ public class UserBuildJobModel {
         this.jobname = jobname;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     public String getUrl() {
         return url;

@@ -2,9 +2,11 @@ package com.mycompany.echo.AllTasksAndServices;
 
 import com.microsoft.bot.builder.TurnContext;
 import com.mycompany.echo.AllModels.QueueJobModel;
+import com.mycompany.echo.AllModels.UserBuildJobModel;
 import com.mycompany.echo.AllRepositories.LockedResourceRepo;
 import com.mycompany.echo.AllRepositories.QueueJobRepo;
 import com.mycompany.echo.AllRepositories.ResourceRepository;
+import com.mycompany.echo.AllRepositories.UserBuildJobRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -21,16 +23,13 @@ public class JenkinJobBuild {
     @Autowired
     BuildNumberByQueueId buildNumberByQueueId;
 
-    @Autowired
-    TriggerJobStatus triggerJobStatus;
+   @Autowired
+    UserBuildJobModel userBuildJobModel;
 
     @Autowired
-    QueueJobRepo queueJobRepo;
+    UserBuildJobRepo userBuildJobRepo;
 
-    @Autowired
-    QueueJobModel queueJobModel;
-
-    public String triggerJob(String jobName,String chart_name,String release_name,String branch,String mode, TurnContext turnContext) throws InterruptedException {
+    public String triggerJob(String jobName, String chart_name, String release_name, String branch, String mode, TurnContext turnContext) throws InterruptedException {
 //        String jenkinsUrl = "http://localhost:8080";
         String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
 //        String username = "Praveen_Kumar";
@@ -54,14 +53,14 @@ public class JenkinJobBuild {
 
 
             StringBuilder apiUrl = new StringBuilder(jenkinsUrl + "/job/" + jobName + "/buildWithParameters");
-            if(chart_name!=null)
-            apiUrl.append("?CHART_NAME=").append(chart_name);
-            if(release_name!=null)
-            apiUrl.append("&CHART_RELEASE_NAME=").append(release_name);
-            if(branch!=null)
-            apiUrl.append("&CHART_REPO_BRANCH=").append(branch);
-            if(mode!=null)
-            apiUrl.append("&JOB_MODE=").append(mode);
+            if (chart_name != null)
+                apiUrl.append("?CHART_NAME=").append(chart_name);
+            if (release_name != null)
+                apiUrl.append("&CHART_RELEASE_NAME=").append(release_name);
+            if (branch != null)
+                apiUrl.append("&CHART_REPO_BRANCH=").append(branch);
+            if (mode != null)
+                apiUrl.append("&JOB_MODE=").append(mode);
             String resource = chart_name + " " + release_name;
 
             ResponseEntity<String> triggerResponse = restTemplate.exchange(apiUrl.toString(), HttpMethod.POST, new HttpEntity<>(headers), String.class);
@@ -76,13 +75,22 @@ public class JenkinJobBuild {
 
 
                 Long buildNumberLong = buildNumberByQueueId.getBuildNumber(itemId, jobName);
-                 triggerJobStatus.getStatus(jobName, itemId, buildNumberLong, turnContext);
+//                triggerJobStatus.getStatus(jobName, itemId, buildNumberLong, turnContext);
+                TriggerJobStatus triggerJobStatus=new TriggerJobStatus();
+                triggerJobStatus.setArguments(jobName, itemId, buildNumberLong, turnContext);
+                 Thread thread=new Thread(triggerJobStatus);
+                 thread.start();
                 System.out.println("Queue Item ID: " + itemId);
                 buildNumberLong++;
                 String url = jenkinsUrl + "/job/" + jobName + "/" + buildNumberLong;
-                String markdownLink = "[" + "CheckStatus" + "](" + url + ")";
 
-                String responseMessage = markdownLink;
+                String responseMessage = "[" + "CheckStatus" + "](" + url + ")";
+
+                userBuildJobModel.setJobname(jobName);
+                userBuildJobModel.setUrl(responseMessage);
+                userBuildJobModel.setEmail(username);
+                userBuildJobModel.setTriggertime(LocalDateTime.now());
+                userBuildJobRepo.save(userBuildJobModel);
 
                 return responseMessage + " " + "Triggered Successfully";
 

@@ -134,7 +134,7 @@ public class EchoBot extends ActivityHandler {
             } else if (userInput.get(0).equals("build") && userInput.get(1).equals("job")) {
                 buildJobForm.getForm(turnContext);
                 messageToUser = "fill this form";
-            }else if(userInput.get(0).equals("mybuilds")&& userInput.get(1).equals("status")){
+            }else if(userInput.get(0).equals("mybuild")&& userInput.get(1).equals("jobs")){
                 messageToUser=userSpecificBuildsStatus.getStatus(turnContext);
             }else if(userInput.get(0).equals("abort")&& userInput.get(1).equals("job")){
                 messageToUser=abortjob.abortJob(userInput.get(2),userInput.get(3));

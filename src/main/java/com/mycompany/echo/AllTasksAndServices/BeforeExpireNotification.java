@@ -39,7 +39,6 @@ public class BeforeExpireNotification {
 
 
                         String text = "Your lock for resource : " + lockedResourceModel.getResource() + " will expired at : " + convertUTCToIST.getIST(lockedResourceModel.getExpiretime());
-                        System.out.println(lockedResourceModel.getResource());
 
                         String ownerEmail = lockedResourceModel.getUseremail();
                         List<TurnContext> contexts = allContext.getContext(ownerEmail);

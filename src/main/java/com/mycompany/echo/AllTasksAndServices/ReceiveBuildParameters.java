@@ -18,7 +18,6 @@ public class ReceiveBuildParameters {
         String message= "failed to trigger";
         if (turnContext.getActivity().getValue() != null) {
             Object value = turnContext.getActivity().getValue();
-            System.out.println(turnContext.getActivity().getName());
             if (value instanceof Map) {
                 Map<?, ?> mapData = (Map<?, ?>) value;
 

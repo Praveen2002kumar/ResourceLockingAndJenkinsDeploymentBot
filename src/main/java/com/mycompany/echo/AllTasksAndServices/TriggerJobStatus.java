@@ -3,29 +3,30 @@ package com.mycompany.echo.AllTasksAndServices;
 
 import com.microsoft.bot.builder.TurnContext;
 
-import com.mycompany.echo.AllModels.UserBuildJobModel;
-import com.mycompany.echo.AllRepositories.UserBuildJobRepo;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 @Component
-public class TriggerJobStatus{
-
-    @Autowired
-    AlertCard alertCard;
-
-    @Autowired
-    UserBuildJobRepo userBuildJobRepo;
-    @Autowired
-    UserBuildJobModel userBuildJobModel;
+public class TriggerJobStatus implements Runnable{
 
 
-    public void getStatus(String jobName,String itemId,Long buildNumberLong,TurnContext turnContext)  {
+    private String jobName;
+    private String itemId;
+    private Long buildNumberLong;
+    private TurnContext turnContext;
+
+    public void setArguments(String job,String item,Long build,TurnContext tc){
+        jobName=job;
+        itemId=item;
+        buildNumberLong=build;
+        turnContext=tc;
+    }
+
+
+    public void run()  {
 //                String jenkinsUrl = "http://localhost:8080";
         String jenkinsUrl = "https://qa4-build.sprinklr.com/jenkins";
 //        String username = "Praveen_Kumar";
@@ -55,7 +56,7 @@ public class TriggerJobStatus{
             // Check if the item is still in the queue
             if (queueItemStatus.contains("\"why\":null")) {
                 try {
-                    Thread.sleep(300000); // Wait for 5 min before checking again
+                    Thread.sleep(60000); // Wait for 1 min before checking again
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -66,19 +67,12 @@ public class TriggerJobStatus{
 
                 // Extract the build status from the response
                 String buildStatus = extractBuildStatus(statusResponse.getBody());
-                buildNumberLong++;
-                String url = jenkinsUrl + "/job/" + jobName + "/" + buildNumberLong;
-                String markdownLink = "[" + "CheckStatus" + "](" + url + ")";
-                userBuildJobModel.setJobname(jobName);
-                userBuildJobModel.setStatus(buildStatus);
-                userBuildJobModel.setUrl(markdownLink);
-                userBuildJobModel.setEmail(username);
-                userBuildJobRepo.save(userBuildJobModel);
+                AlertCard alertCard=new AlertCard();
                 alertCard.showAlert("🔔🔔Deploy Status", buildStatus + " : " + jobName, turnContext);
-//                return buildStatus + " : " + jobName;
+
             }
         }
-//        return "job not found";
+
 
 
     }
