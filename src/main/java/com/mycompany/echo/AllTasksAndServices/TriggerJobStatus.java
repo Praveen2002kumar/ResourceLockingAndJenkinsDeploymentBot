@@ -82,9 +82,5 @@ public class TriggerJobStatus implements Runnable{
         return statusResponse.contains("\"result\":\"SUCCESS\"") ? "SUCCESS" : "FAILURE";
     }
 
-    private String extractBuildNumber(String statusResponse) {
-
-        return statusResponse.contains("\"number\":") ? statusResponse.split("\"number\":")[1].split(",")[0].trim() : "";
-    }
 
 }
