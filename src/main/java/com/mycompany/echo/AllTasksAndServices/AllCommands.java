@@ -9,7 +9,7 @@ public class AllCommands {
 
        String messageToUser=" 1) To add/remove resources by admin : add/remove resource resourcename";
         messageToUser+="\n\n";
-        messageToUser+=" 2) To lock resource : lock resource resourcename timeperiod";
+        messageToUser+=" 2) To lock resource : lock resource resourcename hours minutes";
         messageToUser+="\n\n";
         messageToUser+=" 3) To unlock resource : unlock resource resourcename";
         messageToUser+="\n\n";

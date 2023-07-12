@@ -50,16 +50,16 @@ public class JenkinJobBuild {
 
         // Trigger the build
         try {
-
+            System.out.println(chart_name);
 
             StringBuilder apiUrl = new StringBuilder(jenkinsUrl + "/job/" + jobName + "/buildWithParameters");
-            if (chart_name != null)
+
                 apiUrl.append("?CHART_NAME=").append(chart_name);
-            if (release_name != null)
+
                 apiUrl.append("&CHART_RELEASE_NAME=").append(release_name);
-            if (branch != null)
+
                 apiUrl.append("&CHART_REPO_BRANCH=").append(branch);
-            if (mode != null)
+
                 apiUrl.append("&JOB_MODE=").append(mode);
             String resource = chart_name + " " + release_name;
 

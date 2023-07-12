@@ -78,6 +78,9 @@ public class EchoBot extends ActivityHandler {
     @Autowired
     Abortjob abortjob;
 
+    @Autowired
+    GrantResourceForm grantResourceForm;
+
     @Override
     protected CompletableFuture<Void> onMessageActivity(TurnContext turnContext) {
         String messageToUser = "help : all commands";
@@ -110,7 +113,7 @@ public class EchoBot extends ActivityHandler {
                 if (resourceRepository.findByResourcename(userInput.get(2)) == null)
                     messageToUser = "Resource not found";
 
-                messageToUser = resourceLocking.LockResource(userInput.get(2), userInput.get(3), turnContext);
+                messageToUser = resourceLocking.LockResource(userInput.get(2), userInput.get(3),userInput.get(4), turnContext);
 
             } else if (userInput.get(0).equals("unlock") && userInput.get(1).equals("resource")) {
 
@@ -119,7 +122,8 @@ public class EchoBot extends ActivityHandler {
             } else if (userInput.get(0).equals("locked") && userInput.get(1).equals("resources")) {
                 messageToUser = allLockedResources.getLockedResources();
             } else if (userInput.get(0).equals("grant") && userInput.get(1).equals("resource")) {
-                messageToUser = exchangeLock.getExchange(userInput.get(2), userInput.get(3), turnContext, userInput.get(4));
+                   grantResourceForm.getForm(turnContext);
+                   messageToUser="fill this form";
             } else if (userInput.get(0).equals("remove") && userInput.get(1).equals("resource")) {
                 messageToUser = removeResource.getRemove(userInput.get(2), turnContext);
             } else if ((userInput.get(0).equals("inc") || userInput.get(0).equals("dec")) && userInput.get(1).equals("lock")) {

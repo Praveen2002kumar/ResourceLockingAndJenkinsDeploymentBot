@@ -40,15 +40,18 @@ public class ResourceLocking {
 
 
 
-    public synchronized String LockResource(String resource,String timeString, TurnContext turnContext) {
+    public synchronized String LockResource(String resource,String hourString,String minuteString, TurnContext turnContext) {
         if(resourceRepository.findByResourcename(resource)==null)return "Resource not found";
           //acquire lock
         Long minutes;
+        Long hour;
         try {
-           minutes = Long.parseLong(timeString);
+            hour=Long.parseLong(hourString);
+           minutes = Long.parseLong(minuteString);
         }catch (NumberFormatException e){
             return "Number format exception";
         }
+        minutes=minutes+hour*60;
 
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();

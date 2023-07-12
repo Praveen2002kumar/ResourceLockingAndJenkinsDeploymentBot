@@ -14,6 +14,9 @@ public class ReceiveBuildParameters {
     @Autowired
     JenkinJobBuild jenkinJobBuild;
 
+    @Autowired
+    ExchangeLock exchangeLock;
+
     public String getReceive(TurnContext turnContext) {
         String message= "failed to trigger";
         if (turnContext.getActivity().getValue() != null) {
@@ -22,16 +25,28 @@ public class ReceiveBuildParameters {
                 Map<?, ?> mapData = (Map<?, ?>) value;
 
                 // Extract the values of input1 and input2
-                String job_name = (String) mapData.get("job_name");
-                String chart_name = (String) mapData.get("chart_name");
-                String chart_release_name = (String) mapData.get("chart_release_name");
-                String branch = (String) mapData.get("branch");
-                String mode = (String) mapData.get("mode");
-                try {
-                    message = jenkinJobBuild.triggerJob(job_name, chart_name, chart_release_name, branch, mode, turnContext);
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+               if(mapData.size()==5&& mapData.containsKey("job_name")){
+                   String job_name = (String) mapData.get("job_name");
+                   String chart_name = (String) mapData.get("chart_name");
+                   String chart_release_name = (String) mapData.get("chart_release_name");
+                   String branch = (String) mapData.get("branch");
+                   String mode = (String) mapData.get("mode");
+                   try {
+
+                       message = jenkinJobBuild.triggerJob(job_name, chart_name, chart_release_name, branch, mode, turnContext);
+
+                   } catch (InterruptedException e) {
+                       throw new RuntimeException(e);
+                   }
+               }else{
+                   String useremail=(String)mapData.get("email");
+                   String resource=(String)mapData.get("resource");
+                   String hour=(String)mapData.get("hour");
+                   String minute=(String)mapData.get("minute");
+                  message=exchangeLock.getExchange(useremail,resource,turnContext,hour,minute);
+
+
+               }
             }
         }
 

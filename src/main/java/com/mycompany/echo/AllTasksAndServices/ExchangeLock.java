@@ -40,13 +40,16 @@ public class ExchangeLock {
     @Autowired
     ConvertUTCToIST convertUTCToIST;
 
-    public String getExchange(String senderemail, String resource, TurnContext turnContext, String timeString) {
+    public String getExchange(String senderemail, String resource, TurnContext turnContext, String hourString,String minuteString) {
         long time;
+        long hour;
         try {
-            time = Long.parseLong(timeString);
+            hour=Long.parseLong(hourString);
+            time = Long.parseLong(minuteString);
         } catch (NumberFormatException e) {
             return "number format exception";
         }
+        time=time+hour*60;
 
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
