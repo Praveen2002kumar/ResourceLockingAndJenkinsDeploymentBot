@@ -1,12 +1,13 @@
 package com.mycompany.echo.AllTasksAndServices;
 
 import com.microsoft.bot.builder.TurnContext;
+import com.microsoft.bot.builder.teams.TeamsInfo;
+import com.microsoft.bot.schema.ChannelAccount;
+import com.microsoft.bot.schema.teams.TeamsChannelAccount;
 import com.mycompany.echo.AllModels.QueueJobModel;
+import com.mycompany.echo.AllModels.TriggerJobModel;
 import com.mycompany.echo.AllModels.UserBuildJobModel;
-import com.mycompany.echo.AllRepositories.LockedResourceRepo;
-import com.mycompany.echo.AllRepositories.QueueJobRepo;
-import com.mycompany.echo.AllRepositories.ResourceRepository;
-import com.mycompany.echo.AllRepositories.UserBuildJobRepo;
+import com.mycompany.echo.AllRepositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -23,19 +24,45 @@ public class JenkinJobBuild {
     @Autowired
     BuildNumberByQueueId buildNumberByQueueId;
 
-   @Autowired
+    @Autowired
     UserBuildJobModel userBuildJobModel;
 
     @Autowired
     UserBuildJobRepo userBuildJobRepo;
 
+    @Autowired
+    LockedResourceRepo lockedResourceRepo;
+
+    @Autowired
+    ResourceRepository resourceRepository;
+
+    @Autowired
+    TriggerJobRepo triggerJobRepo;
+
+    @Autowired
+    TriggerJobModel triggerJobModel;
+
+    @Autowired
+    JenkinsTokenRepo jenkinsTokenRepo;
+
     public String triggerJob(String jobName, String chart_name, String release_name, String branch, String mode, TurnContext turnContext) throws InterruptedException {
-        String jenkinsUrl = "http://localhost:8080";
-       
-        String username = "Praveen_Kumar";
-        
-        String password = "11526c2640716f0683072286fe8c801ae5";
-        
+        ChannelAccount sentBy = turnContext.getActivity().getFrom();
+        TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
+        String userEmail = teamsAcc.getEmail();
+
+//        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
+//        String username="praveen.kumar@sprinklr.com";
+//        String password="1120ed4c398b26347643d298081be50185";
+//        String jenkinsUrl = "http://localhost:8080";
+          String jenkinsUrl = "https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app";
+//        String username = "Praveen_Kumar";
+//
+//        String password = "11526c2640716f0683072286fe8c801ae5";
+        String username=userEmail;
+        if(jenkinsTokenRepo.findByEmail(username)==null)return "Access token not found use command : add token tokenvalue";
+        String password=jenkinsTokenRepo.findByEmail(username).getToken();
+        username="Praveen_Kumar";
+
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
 
@@ -54,17 +81,19 @@ public class JenkinJobBuild {
 
             StringBuilder apiUrl = new StringBuilder(jenkinsUrl + "/job/" + jobName + "/buildWithParameters");
 
-                apiUrl.append("?CHART_NAME=").append(chart_name);
+            apiUrl.append("?CHART_NAME=").append(chart_name);
 
-                apiUrl.append("&CHART_RELEASE_NAME=").append(release_name);
+            apiUrl.append("&CHART_RELEASE_NAME=").append(release_name);
 
-                apiUrl.append("&CHART_REPO_BRANCH=").append(branch);
+            apiUrl.append("&CHART_REPO_BRANCH=").append(branch);
 
-                apiUrl.append("&JOB_MODE=").append(mode);
-            String resource = chart_name + " " + release_name;
+            apiUrl.append("&JOB_MODE=").append(mode);
+            String resource = chart_name + "-" + release_name;
+            if (lockedResourceRepo.findByResource(resource) != null)
+                return resource + " : is already lock by : " + lockedResourceRepo.findByResource(resource).getUseremail();
 
             ResponseEntity<String> triggerResponse = restTemplate.exchange(apiUrl.toString(), HttpMethod.POST, new HttpEntity<>(headers), String.class);
-
+//            System.out.println(apiUrl);
             // Extract the Location header from the response
 
             if (triggerResponse.getStatusCode().is2xxSuccessful()) {
@@ -74,15 +103,18 @@ public class JenkinJobBuild {
                 String itemId = extractItemIdFromLocationHeader(locationHeader);
 
 
-                Long buildNumberLong = buildNumberByQueueId.getBuildNumber(itemId, jobName);
-//                triggerJobStatus.getStatus(jobName, itemId, buildNumberLong, turnContext);
-                TriggerJobStatus triggerJobStatus=new TriggerJobStatus();
-                triggerJobStatus.setArguments(jobName, itemId, buildNumberLong, turnContext);
-                 Thread thread=new Thread(triggerJobStatus);
-                 thread.start();
-                System.out.println("Queue Item ID: " + itemId);
-                buildNumberLong++;
+                Long buildNumberLong = buildNumberByQueueId.getBuildNumber(itemId, jobName,username,password) + 1;
+
+
                 String url = jenkinsUrl + "/job/" + jobName + "/" + buildNumberLong;
+
+                triggerJobModel.setEmail(userEmail);
+                triggerJobModel.setUrl(url+"/api/json");
+                triggerJobModel.setBuildnumber(String.valueOf(buildNumberLong));
+                triggerJobModel.setJobname(jobName);
+                triggerJobRepo.save(triggerJobModel);
+                System.out.println("Queue Item ID: " + itemId);
+
 
                 String responseMessage = "[" + "CheckStatus" + "](" + url + ")";
 
@@ -96,10 +128,8 @@ public class JenkinJobBuild {
 
             }
 
-        } catch (HttpClientErrorException | IndexOutOfBoundsException e) {
-            System.out.println(e);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            System.out.println(e);
         }
         return "Job not found";
     }
@@ -110,6 +140,7 @@ public class JenkinJobBuild {
         String[] parts = locationHeader.split("/");
         return parts[parts.length - 1];
     }
+
     private String extractUrl(String statusResponse) {
 
         return statusResponse.contains("\"url\":") ? statusResponse.split("\"url\":")[1].split(",")[0].trim() : "";

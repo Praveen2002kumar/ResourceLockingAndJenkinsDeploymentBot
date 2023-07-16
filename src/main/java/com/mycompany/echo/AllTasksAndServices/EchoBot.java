@@ -8,8 +8,10 @@ import com.microsoft.bot.builder.ActivityHandler;
 import com.microsoft.bot.builder.MessageFactory;
 import com.microsoft.bot.builder.TurnContext;
 
+import com.microsoft.bot.builder.teams.TeamsInfo;
 import com.microsoft.bot.schema.*;
 
+import com.microsoft.bot.schema.teams.TeamsChannelAccount;
 import com.mycompany.echo.AllRepositories.*;
 
 import org.apache.commons.lang3.StringUtils;
@@ -45,9 +47,6 @@ public class EchoBot extends ActivityHandler {
     AllLockedResources allLockedResources;
 
     @Autowired
-    ExchangeLock exchangeLock;
-
-    @Autowired
     AllCommands allCommands;
 
     @Autowired
@@ -69,7 +68,7 @@ public class EchoBot extends ActivityHandler {
     BuildJobForm buildJobForm;
 
     @Autowired
-    ReceiveBuildParameters receiveBuildParameters;
+    ReceiveAllFormParameters receiveBuildParameters;
 
 
     @Autowired
@@ -81,17 +80,25 @@ public class EchoBot extends ActivityHandler {
     @Autowired
     GrantResourceForm grantResourceForm;
 
+    @Autowired
+    LockResourceForm lockResourceForm;
+
+    @Autowired
+    AddTokenForm addTokenForm;
+
     @Override
     protected CompletableFuture<Void> onMessageActivity(TurnContext turnContext) {
+        consumeContext.getConsume(turnContext);
+
         String messageToUser = "help : all commands";
-        if (turnContext.getActivity().isType(ActivityTypes.MESSAGE)&&turnContext.getActivity().getText() == null) {
+        if (turnContext.getActivity().isType(ActivityTypes.MESSAGE) && turnContext.getActivity().getText() == null) {
             messageToUser = receiveBuildParameters.getReceive(turnContext);
             Activity reply = MessageFactory.text(messageToUser);
             return turnContext.sendActivity(reply).thenApply(resourceResponse -> null);
         }
 
 
-        consumeContext.getConsume(turnContext);
+
         String input = turnContext.getActivity().getText();
         StringTokenizer tokenizer = new StringTokenizer(input);
 
@@ -100,6 +107,10 @@ public class EchoBot extends ActivityHandler {
             String token = tokenizer.nextToken();
             userInput.add(token);
         }
+//        String activityText = turnContext.getActivity().getText();
+//        String[] words = activityText.split("\\s+");
+//
+//        List<String> userInput = Arrays.asList(words);
 
 
         try {
@@ -110,20 +121,18 @@ public class EchoBot extends ActivityHandler {
             } else if (userInput.get(0).equals("add") && userInput.get(1).equals("resource")) {
                 messageToUser = adminAddedResources.addResource(userInput.get(2), turnContext);
             } else if (userInput.get(0).equals("lock") && userInput.get(1).equals("resource")) {
-                if (resourceRepository.findByResourcename(userInput.get(2)) == null)
-                    messageToUser = "Resource not found";
-
-                messageToUser = resourceLocking.LockResource(userInput.get(2), userInput.get(3),userInput.get(4), turnContext);
+                lockResourceForm.getForm(turnContext);
+                messageToUser = "fill this form";
 
             } else if (userInput.get(0).equals("unlock") && userInput.get(1).equals("resource")) {
 
                 messageToUser = resourceLocking.UnlockResource(userInput.get(2), turnContext);
 
-            } else if (userInput.get(0).equals("locked") && userInput.get(1).equals("resources")) {
+            } else if (userInput.get(0).equals("locked") && userInput.get(1).equals("history")) {
                 messageToUser = allLockedResources.getLockedResources();
             } else if (userInput.get(0).equals("grant") && userInput.get(1).equals("resource")) {
-                   grantResourceForm.getForm(turnContext);
-                   messageToUser="fill this form";
+                grantResourceForm.getForm(turnContext);
+                messageToUser = "fill this form";
             } else if (userInput.get(0).equals("remove") && userInput.get(1).equals("resource")) {
                 messageToUser = removeResource.getRemove(userInput.get(2), turnContext);
             } else if ((userInput.get(0).equals("inc") || userInput.get(0).equals("dec")) && userInput.get(1).equals("lock")) {
@@ -138,10 +147,13 @@ public class EchoBot extends ActivityHandler {
             } else if (userInput.get(0).equals("build") && userInput.get(1).equals("job")) {
                 buildJobForm.getForm(turnContext);
                 messageToUser = "fill this form";
-            }else if(userInput.get(0).equals("mybuild")&& userInput.get(1).equals("jobs")){
-                messageToUser=userSpecificBuildsStatus.getStatus(turnContext);
-            }else if(userInput.get(0).equals("abort")&& userInput.get(1).equals("job")){
-                messageToUser=abortjob.abortJob(userInput.get(2),userInput.get(3));
+            } else if (userInput.get(0).equals("mybuild") && userInput.get(1).equals("jobs")) {
+                messageToUser = userSpecificBuildsStatus.getStatus(turnContext);
+            } else if (userInput.get(0).equals("abort") && userInput.get(1).equals("job")) {
+                messageToUser = abortjob.abortJob(userInput.get(2), userInput.get(3), turnContext);
+            } else if (userInput.get(0).equals("add") && userInput.get(1).equals("token")) {
+                addTokenForm.getForm(turnContext);
+                messageToUser = "fill token value";
             }
         } catch (IndexOutOfBoundsException | NullPointerException e) {
             System.out.println(e);
@@ -160,6 +172,8 @@ public class EchoBot extends ActivityHandler {
             List<ChannelAccount> membersAdded,
             TurnContext turnContext
     ) {
+
+
 
         return membersAdded.stream()
                 .filter(

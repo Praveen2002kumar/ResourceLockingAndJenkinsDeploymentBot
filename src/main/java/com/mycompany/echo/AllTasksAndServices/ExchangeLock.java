@@ -47,7 +47,7 @@ public class ExchangeLock {
             hour=Long.parseLong(hourString);
             time = Long.parseLong(minuteString);
         } catch (NumberFormatException e) {
-            return "number format exception";
+            return "please enter number";
         }
         time=time+hour*60;
 
@@ -56,26 +56,27 @@ public class ExchangeLock {
         String useremail = teamsAcc.getEmail();
         List<TurnContext> list = allContext.getContext(senderemail);
 
-
-        if (lockedResourceRepo.findByResource(resource) == null || !lockedResourceRepo.findByResource(resource).getUseremail().equals(useremail)) {
-            return "You have not lock of this resource";
-        }
+        if(lockedResourceRepo.findByResource(resource) == null)return "You have not lock of this resource";
+        System.out.println(lockedResourceRepo.findByResource(resource).getUseremail()+useremail);
 
 
-        lockedResourceRepo.deleteById(lockedResourceRepo.findByResource(resource).getId());
-        lockedResourceModel.setUseremail(senderemail);
-        lockedResourceModel.setResource(resource);
-        lockedResourceModel.setExpiretime(LocalDateTime.now().plusMinutes(time));
-        lockedResourceRepo.save(lockedResourceModel);
-        if(expireLockNotificationRepo.findByResource(resource)!=null)expireLockNotificationRepo.deleteById(expireLockNotificationRepo.findByResource(resource).getId());
-        expireLockNotificationModel.setExpiretime(LocalDateTime.now().plusMinutes(time));
-        expireLockNotificationModel.setUseremail(senderemail);
-        expireLockNotificationModel.setResource(resource);
-        expireLockNotificationRepo.save(expireLockNotificationModel);
-        for (TurnContext context : list) {
-            alertCard.showAlert("🔔🔔🔔🔔Notification", "Lock for resource : " + lockedResourceModel.getResource() + " has been granted to you , Expire at : "+convertUTCToIST.getIST(LocalDateTime.now().plusMinutes(time)), context);
-        }
-        return "Successfully granted lock to : " + senderemail;
+       if(lockedResourceRepo.findByResource(resource).getUseremail().equals(useremail)){
+           lockedResourceRepo.deleteById(lockedResourceRepo.findByResource(resource).getId());
+           lockedResourceModel.setUseremail(senderemail);
+           lockedResourceModel.setResource(resource);
+           lockedResourceModel.setExpiretime(LocalDateTime.now().plusMinutes(time));
+           lockedResourceRepo.save(lockedResourceModel);
+           if(expireLockNotificationRepo.findByResource(resource)!=null)expireLockNotificationRepo.deleteById(expireLockNotificationRepo.findByResource(resource).getId());
+           expireLockNotificationModel.setExpiretime(LocalDateTime.now().plusMinutes(time));
+           expireLockNotificationModel.setUseremail(senderemail);
+           expireLockNotificationModel.setResource(resource);
+           expireLockNotificationRepo.save(expireLockNotificationModel);
+           for (TurnContext context : list) {
+               alertCard.showAlert("🔔🔔🔔🔔Notification", "Lock for resource : " + lockedResourceModel.getResource() + " has been granted to you , Expire at : "+convertUTCToIST.getIST(LocalDateTime.now().plusMinutes(time)), context);
+           }
+           return "Successfully granted lock to : " + senderemail;
+       }
+       return "You have not lock of this resource";
 
     }
 }

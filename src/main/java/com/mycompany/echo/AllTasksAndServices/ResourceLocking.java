@@ -56,6 +56,7 @@ public class ResourceLocking {
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
         String useremail=teamsAcc.getEmail();
+        if(useremail==null)useremail="test@sprinklr.com";
 
 
         try {
@@ -75,6 +76,7 @@ public class ResourceLocking {
           expireLockNotificationModel.setExpiretime(currenttime.plusMinutes(minutes));
           expireLockNotificationModel.setUseremail(useremail);
           expireLockNotificationModel.setResource(resource);
+
           expireLockNotificationRepo.save(expireLockNotificationModel);
          return "successfully locked the resource";
         } catch (NullPointerException e){
@@ -88,6 +90,7 @@ public class ResourceLocking {
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
         String useremail=teamsAcc.getEmail();
+        if(useremail==null)useremail="test@sprinklr.com";
 
         LockedResourceModel lockedResource=lockedResourceRepo.findByResource(resource);
         if(lockedResource==null)return "Resource not found";

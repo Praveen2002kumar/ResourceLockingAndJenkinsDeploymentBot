@@ -18,6 +18,7 @@ public class AllContext {
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
         String email=teamsAcc.getEmail();
+        if(email==null)email="test@sprinklr.com";
         List<TurnContext> values = usercontext.getOrDefault(email, new ArrayList<>());
         values.add(turnContext);
         usercontext.put(email,values);

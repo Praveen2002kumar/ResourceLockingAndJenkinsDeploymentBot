@@ -12,7 +12,7 @@ public class AllResources {
     @Autowired
     ResourceRepository resourceRepository;
     public String getAllResources(){
-        StringBuilder messageToUser= new StringBuilder("Available resources" + "\n\n");
+        StringBuilder messageToUser= new StringBuilder("All Available resources" + "\n\n");
         List<ResourceModel> allresource=resourceRepository.findAll();
         for (ResourceModel resourceModel : allresource) {
             messageToUser.append(resourceModel.getResourcename());

@@ -15,8 +15,8 @@ public class LockedResourceModel {
     private String id;
     private String resource;
     private LocalDateTime expiretime;
-
     private String useremail;
+    private String status;
 
 
 

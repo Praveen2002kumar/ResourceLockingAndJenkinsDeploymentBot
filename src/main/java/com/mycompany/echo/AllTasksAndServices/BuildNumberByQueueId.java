@@ -10,14 +10,12 @@ import java.util.Base64;
 @Component
 public class BuildNumberByQueueId {
 
-    public long getBuildNumber(String queueId,String jobName) throws  Exception{
-
-                String jenkinsUrl = "http://localhost:8080/";
+    public long getBuildNumber(String queueId, String jobName, String username, String password) throws Exception {
 //        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins/";
-        String username = "Praveen_Kumar";
-//        String username="praveen.kumar@sprinklr.com";
-        String password = "11526c2640716f0683072286fe8c801ae5";
-//        String password="11cac87e679a977391343de33757fdf4ae";
+
+
+        String jenkinsUrl = "https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app/";
+
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -31,7 +29,7 @@ public class BuildNumberByQueueId {
         headers.set("Authorization", "Basic " + base64AuthHeader);
 
 
-        String buildUrl1 = jenkinsUrl+"job/" + jobName+ "/lastBuild/buildNumber";
+        String buildUrl1 = jenkinsUrl + "job/" + jobName + "/lastBuild/buildNumber";
         ResponseEntity<String> buildNumberResponse = restTemplate.exchange(buildUrl1, HttpMethod.GET, new HttpEntity<>(headers), String.class);
         String buildNumber = extractBuildNumber(buildNumberResponse.getBody());
         System.out.println(buildNumber);

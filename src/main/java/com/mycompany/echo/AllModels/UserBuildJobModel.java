@@ -16,6 +16,7 @@ public class UserBuildJobModel {
     private String url;
     private String email;
 
+
     public LocalDateTime getTriggertime() {
         return triggertime;
     }
