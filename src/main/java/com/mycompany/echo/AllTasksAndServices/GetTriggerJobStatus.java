@@ -59,7 +59,9 @@ public class GetTriggerJobStatus {
 
                  if (response.getStatusCode().is2xxSuccessful()) {
                      String responseBody = response.getBody();
+
                      Boolean inProgress = responseBody.contains("\"result\":null") ;
+
                      if(!inProgress){
                          List<TurnContext> contexts=allContext.getContext(triggerJob.getEmail());
                          String buildStatus=responseBody.contains("\"result\":\"SUCCESS\"") ? "SUCCESS" : "FAILURE";
