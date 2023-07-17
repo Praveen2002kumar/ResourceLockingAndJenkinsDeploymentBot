@@ -1,0 +1,44 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.14/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.14",
+  "version": "1.0.1",
+  "id": "23b3b230-43c3-497c-a7af-70fd68b15395",
+  "packageName": "com.sprinklr.chatbot",
+  "developer": {
+    "name": "Praveen Kumar",
+    "websiteUrl": "https://www.microsoft.com",
+    "privacyUrl": "https://www.teams.com/privacy",
+    "termsOfUseUrl": "https://www.teams.com/termsofuser"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "JenkinsDeployment",
+    "full": "code alert bot"
+  },
+  "description": {
+    "short": "A bot to trigger jenkins deplyment",
+    "full": "Triggers jobs when resource are unlock"
+  },
+  "accentColor": "#FFFFFF",
+  "bots": [
+    {
+      "botId": "23b3b230-43c3-497c-a7af-70fd68b15395",
+      "scopes": [
+        "personal",
+        "team",
+        "groupchat"
+      ],
+      "isNotificationOnly": false,
+      "supportsCalling": false,
+      "supportsVideo": false,
+      "supportsFiles": false
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ]
+}

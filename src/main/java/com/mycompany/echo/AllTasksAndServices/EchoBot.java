@@ -125,7 +125,7 @@ public class EchoBot extends ActivityHandler {
                 messageToUser = "fill this form";
 
             } else if (userInput.get(0).equals("unlock") && userInput.get(1).equals("resource")) {
-
+           
                 messageToUser = resourceLocking.UnlockResource(userInput.get(2), turnContext);
 
             } else if (userInput.get(0).equals("locked") && userInput.get(1).equals("history")) {
