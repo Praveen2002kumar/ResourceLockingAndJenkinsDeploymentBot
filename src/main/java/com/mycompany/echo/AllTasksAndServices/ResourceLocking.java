@@ -59,6 +59,7 @@ public class ResourceLocking {
         if(useremail==null)useremail="test@sprinklr.com";
 
 
+
         try {
 
         LockedResourceModel lockedResource=lockedResourceRepo.findByResource(resource);
@@ -76,8 +77,8 @@ public class ResourceLocking {
           expireLockNotificationModel.setExpiretime(currenttime.plusMinutes(minutes));
           expireLockNotificationModel.setUseremail(useremail);
           expireLockNotificationModel.setResource(resource);
-
           expireLockNotificationRepo.save(expireLockNotificationModel);
+
          return "successfully locked the resource";
         } catch (NullPointerException e){
             System.out.println(e);

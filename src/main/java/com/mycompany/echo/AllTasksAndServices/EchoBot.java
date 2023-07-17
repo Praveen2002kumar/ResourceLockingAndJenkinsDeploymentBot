@@ -7,17 +7,16 @@ import com.codepoetics.protonpack.collectors.CompletableFutures;
 import com.microsoft.bot.builder.ActivityHandler;
 import com.microsoft.bot.builder.MessageFactory;
 import com.microsoft.bot.builder.TurnContext;
-
-import com.microsoft.bot.builder.teams.TeamsInfo;
-import com.microsoft.bot.schema.*;
-
-import com.microsoft.bot.schema.teams.TeamsChannelAccount;
-import com.mycompany.echo.AllRepositories.*;
-
+import com.microsoft.bot.schema.Activity;
+import com.microsoft.bot.schema.ActivityTypes;
+import com.microsoft.bot.schema.ChannelAccount;
+import com.mycompany.echo.AllRepositories.ResourceRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -88,6 +87,7 @@ public class EchoBot extends ActivityHandler {
 
     @Override
     protected CompletableFuture<Void> onMessageActivity(TurnContext turnContext) {
+
         consumeContext.getConsume(turnContext);
 
         String messageToUser = "help : all commands";
@@ -125,7 +125,7 @@ public class EchoBot extends ActivityHandler {
                 messageToUser = "fill this form";
 
             } else if (userInput.get(0).equals("unlock") && userInput.get(1).equals("resource")) {
-
+           
                 messageToUser = resourceLocking.UnlockResource(userInput.get(2), turnContext);
 
             } else if (userInput.get(0).equals("locked") && userInput.get(1).equals("history")) {

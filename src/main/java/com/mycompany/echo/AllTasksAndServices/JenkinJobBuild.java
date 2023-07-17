@@ -4,19 +4,20 @@ import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.builder.teams.TeamsInfo;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.teams.TeamsChannelAccount;
-import com.mycompany.echo.AllModels.QueueJobModel;
 import com.mycompany.echo.AllModels.TriggerJobModel;
 import com.mycompany.echo.AllModels.UserBuildJobModel;
-import com.mycompany.echo.AllRepositories.*;
+import com.mycompany.echo.AllRepositories.JenkinsTokenRepo;
+import com.mycompany.echo.AllRepositories.LockedResourceRepo;
+import com.mycompany.echo.AllRepositories.TriggerJobRepo;
+import com.mycompany.echo.AllRepositories.UserBuildJobRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.util.Base64;
+import java.util.*;
 
 @Component
 public class JenkinJobBuild {
@@ -33,8 +34,6 @@ public class JenkinJobBuild {
     @Autowired
     LockedResourceRepo lockedResourceRepo;
 
-    @Autowired
-    ResourceRepository resourceRepository;
 
     @Autowired
     TriggerJobRepo triggerJobRepo;
@@ -46,25 +45,28 @@ public class JenkinJobBuild {
     JenkinsTokenRepo jenkinsTokenRepo;
 
     public String triggerJob(String jobName, String chart_name, String release_name, String branch, String mode, TurnContext turnContext) throws InterruptedException {
+
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
         String userEmail = teamsAcc.getEmail();
 
-//        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
+        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
 //        String username="praveen.kumar@sprinklr.com";
 //        String password="1120ed4c398b26347643d298081be50185";
 //        String jenkinsUrl = "http://localhost:8080";
-          String jenkinsUrl = "https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app";
+//          String jenkinsUrl = "https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app";
 //        String username = "Praveen_Kumar";
 //
 //        String password = "11526c2640716f0683072286fe8c801ae5";
+
         String username=userEmail;
         if(jenkinsTokenRepo.findByEmail(username)==null)return "Access token not found use command : add token tokenvalue";
         String password=jenkinsTokenRepo.findByEmail(username).getToken();
-        username="Praveen_Kumar";
+
 
         // Create a RestTemplate instance
         RestTemplate restTemplate = new RestTemplate();
+        System.out.println(release_name);
 
         // Set the request headers
         HttpHeaders headers = new HttpHeaders();
@@ -77,24 +79,30 @@ public class JenkinJobBuild {
 
         // Trigger the build
         try {
-            System.out.println(chart_name);
 
             StringBuilder apiUrl = new StringBuilder(jenkinsUrl + "/job/" + jobName + "/buildWithParameters");
+            Map<String,String> parameters=new HashMap<>();
+            if(chart_name!=null)parameters.put("CHART_NAME=",chart_name);
+            if(release_name!=null)parameters.put("CHART_RELEASE_NAME=",release_name);
+            if(branch!=null)parameters.put("CHART_REPO_BRANCH=",branch);
+            if(mode!=null)parameters.put("JOB_MODE=",mode);
 
-            apiUrl.append("?CHART_NAME=").append(chart_name);
+            List<String> keysList = new ArrayList<>(parameters.keySet());
 
-            apiUrl.append("&CHART_RELEASE_NAME=").append(release_name);
+            if(keysList.size()>0){
+                apiUrl.append("?"+keysList.get(0)).append(parameters.get(keysList.get(0)));
+            }
+            for(int i=1;i<parameters.size();i++){
+                apiUrl.append("&"+keysList.get(i)).append(parameters.get(keysList.get(i)));
+            }
 
-            apiUrl.append("&CHART_REPO_BRANCH=").append(branch);
 
-            apiUrl.append("&JOB_MODE=").append(mode);
             String resource = chart_name + "-" + release_name;
             if (lockedResourceRepo.findByResource(resource) != null)
                 return resource + " : is already lock by : " + lockedResourceRepo.findByResource(resource).getUseremail();
 
             ResponseEntity<String> triggerResponse = restTemplate.exchange(apiUrl.toString(), HttpMethod.POST, new HttpEntity<>(headers), String.class);
-//            System.out.println(apiUrl);
-            // Extract the Location header from the response
+
 
             if (triggerResponse.getStatusCode().is2xxSuccessful()) {
                 String locationHeader = triggerResponse.getHeaders().getFirst("Location");
@@ -107,6 +115,7 @@ public class JenkinJobBuild {
 
 
                 String url = jenkinsUrl + "/job/" + jobName + "/" + buildNumberLong;
+
 
                 triggerJobModel.setEmail(userEmail);
                 triggerJobModel.setUrl(url+"/api/json");
@@ -141,9 +150,5 @@ public class JenkinJobBuild {
         return parts[parts.length - 1];
     }
 
-    private String extractUrl(String statusResponse) {
-
-        return statusResponse.contains("\"url\":") ? statusResponse.split("\"url\":")[1].split(",")[0].trim() : "";
-    }
 
 }

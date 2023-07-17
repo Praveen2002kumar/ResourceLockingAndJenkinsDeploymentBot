@@ -24,14 +24,14 @@ public class ReceiveAllFormParameters {
 
 
     public String getReceive(TurnContext turnContext) {
-        String message= "failed to trigger";
+        String message= "FAILED";
         if (turnContext.getActivity().getValue() != null) {
             Object value = turnContext.getActivity().getValue();
             if (value instanceof Map) {
                 Map<?, ?> mapData = (Map<?, ?>) value;
 
                 // Extract the values of input1 and input2
-               if(mapData.size()==5 && mapData.containsKey("job_name")){
+               if( mapData.containsKey("job_name")){
                    String job_name = (String) mapData.get("job_name");
                    String chart_name = (String) mapData.get("chart_name");
                    String chart_release_name = (String) mapData.get("chart_release_name");
@@ -52,11 +52,11 @@ public class ReceiveAllFormParameters {
                   message=exchangeLock.getExchange(useremail,resource,turnContext,hour,minute);
                   
 
-               }else if(mapData.size()==1 && mapData.containsKey("token")){
+               }else if(mapData.containsKey("token")){
                    String token= (String) mapData.get("token");
                    message=addToken.add(turnContext,token);
 
-               }else{
+               }else if(mapData.size()==3 && mapData.containsKey("resource")){
                    String resource=(String)mapData.get("resource");
                    String hour=(String)mapData.get("hour");
                    String minute=(String)mapData.get("minute");

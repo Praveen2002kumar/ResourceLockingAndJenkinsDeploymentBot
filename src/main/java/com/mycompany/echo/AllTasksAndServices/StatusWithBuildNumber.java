@@ -26,19 +26,19 @@ public class StatusWithBuildNumber {
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
         String userEmail = teamsAcc.getEmail();
-//        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
+        String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
 //        String username="praveen.kumar@sprinklr.com";
 //        String password="1120ed4c398b26347643d298081be50185";
 
 //        String jenkinsUrl = "http://localhost:8080";
-        String jenkinsUrl="https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app";
+//        String jenkinsUrl="https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app";
 //
         String username = userEmail;
 //
         if(jenkinsTokenRepo.findByEmail(username)==null)return "Access token not found use command : add token tokenvalue";
         String password = jenkinsTokenRepo.findByEmail(username).getToken();
 //
-        username="Praveen_Kumar";
+
 
        try{
            RestTemplate restTemplate = new RestTemplate();

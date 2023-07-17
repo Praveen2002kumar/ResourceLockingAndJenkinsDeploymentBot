@@ -5,16 +5,8 @@ import com.microsoft.bot.builder.teams.TeamsInfo;
 import com.microsoft.bot.schema.ChannelAccount;
 import com.microsoft.bot.schema.teams.TeamsChannelAccount;
 import com.mycompany.echo.AllRepositories.JenkinsTokenRepo;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpClient;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.client.LaxRedirectStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -28,8 +20,8 @@ public class Abortjob {
     JenkinsTokenRepo jenkinsTokenRepo;
 
     StringBuilder responseStatus= new StringBuilder("job not found");
-    String JENKINS_URL = "https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app";
-//    String JENKINS_URL="https://qa4-build.sprinklr.com/jenkins";
+//    String JENKINS_URL = "https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app";
+    String JENKINS_URL="https://qa4-build.sprinklr.com/jenkins";
 
 //    String USERNAME="praveen.kumar@sprinklr.com";
 //            String PASSWORD = "11526c2640716f0683072286fe8c801ae5";
@@ -42,7 +34,7 @@ public class Abortjob {
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
         String userEmail = teamsAcc.getEmail();
         String USERNAME=userEmail;
-        USERNAME="Praveen_Kumar";
+
         if(jenkinsTokenRepo.findByEmail(userEmail)==null)return "Access token not found";
         String PASSWORD=jenkinsTokenRepo.findByEmail(userEmail).getToken();
         RestTemplate restTemplate = new RestTemplate();

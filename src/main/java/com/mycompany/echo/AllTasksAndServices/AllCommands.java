@@ -28,6 +28,7 @@ public class AllCommands {
         messageToUser+=" 10)To abort jenkins job -> abort job jobname buildnumber";
         messageToUser+="\n\n";
         messageToUser+=" 11)To add jenkins access token -> add token tokenvalue";
+        messageToUser+="\n\n";
         messageToUser+=" 12)To get locked history -> locked history";
         return messageToUser;
     }
