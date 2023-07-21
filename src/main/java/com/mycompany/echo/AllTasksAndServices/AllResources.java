@@ -11,9 +11,14 @@ import java.util.List;
 public class AllResources {
     @Autowired
     ResourceRepository resourceRepository;
-    public String getAllResources(){
-        StringBuilder messageToUser= new StringBuilder("All Available resources" + "\n\n");
-        List<ResourceModel> allresource=resourceRepository.findAll();
+
+    /**
+     * to get all resources added by admin
+     * @return return a string of all resoruces
+     */
+    public String getAllResources() {
+        StringBuilder messageToUser = new StringBuilder("**All Available resources**" + "\n\n");
+        List<ResourceModel> allresource = resourceRepository.findAll();
         for (ResourceModel resourceModel : allresource) {
             messageToUser.append(resourceModel.getResourcename());
             messageToUser.append("\n\n");

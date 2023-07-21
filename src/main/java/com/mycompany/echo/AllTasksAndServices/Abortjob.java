@@ -19,14 +19,18 @@ public class Abortjob {
   @Autowired
     JenkinsTokenRepo jenkinsTokenRepo;
 
+
     StringBuilder responseStatus= new StringBuilder("job not found");
-//    String JENKINS_URL = "https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app";
     String JENKINS_URL="https://qa4-build.sprinklr.com/jenkins";
 
-//    String USERNAME="praveen.kumar@sprinklr.com";
-//            String PASSWORD = "11526c2640716f0683072286fe8c801ae5";
-//    String PASSWORD="11cac87e679a977391343de33757fdf4ae";
 
+    /**
+     * This is used to abort jenkns job
+     * @param JOB_NAME jobname
+     * @param buildNumber buildnumber
+     * @param turnContext turncontext
+     * @return return the status if abort successfully or not
+     */
     public String abortJob(String JOB_NAME, String buildNumber, TurnContext turnContext) {
         String messageToUser = "Invalid job name or buildnumber";
 
@@ -56,9 +60,9 @@ public class Abortjob {
 
 
             ResponseEntity<String> response = restTemplate.exchange(apiUrl.toString(), HttpMethod.POST, new HttpEntity<>(headers), String.class);
-            System.out.println(response.getStatusCode());
 
-                messageToUser = "Jenkins job aborted successfully! : "+JOB_NAME+" , "+buildNumber ;
+            messageToUser = "Jenkins job aborted successfully! : "+JOB_NAME+" , "+buildNumber;
+
         } catch (HttpClientErrorException e) {
             System.out.println(e);
 

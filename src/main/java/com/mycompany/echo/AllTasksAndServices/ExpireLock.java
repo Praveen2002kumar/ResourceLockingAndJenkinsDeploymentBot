@@ -25,6 +25,10 @@ public class ExpireLock {
     @Autowired
     AllContext allContext;
 
+    /**
+     * this function is used to send notification to user about their expire lock
+     */
+
     @Scheduled(fixedDelay = 5000)
     public void deleteExpireLocks() {
 
@@ -36,11 +40,12 @@ public class ExpireLock {
                 if (time == null) time = LocalDateTime.now();
                 LocalDateTime currenttime = LocalDateTime.now();
 
+
                 if (time.isBefore(currenttime)) {
 
 
-                    String text = "Your lock for resource : " + lockedResourceModel.getResource() + " has expired";
-                    System.out.println(lockedResourceModel.getResource());
+                    String text =" Your lock for resource : " + lockedResourceModel.getResource() + " has expired";
+
 
                     String ownerEmail = lockedResourceModel.getUseremail();
                     List<TurnContext> contexts = allContext.getContext(ownerEmail);

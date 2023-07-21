@@ -11,6 +11,24 @@ public class JenkinsTokenModel {
     private String id;
     private String email;
     private String token;
+    public static String encrypt(String plaintext, int key) {
+        StringBuilder encryptedText = new StringBuilder();
+        for (char ch : plaintext.toCharArray()) {
+            if (Character.isLetter(ch)) {
+                char base = Character.isUpperCase(ch) ? 'A' : 'a';
+                char encryptedChar = (char) (((ch - base + key) % 26) + base);
+                encryptedText.append(encryptedChar);
+            } else {
+                encryptedText.append(ch);
+            }
+        }
+        return encryptedText.toString();
+    }
+
+    // Decrypt a ciphertext with a given key
+    public static String decrypt(String ciphertext, int key) {
+        return encrypt(ciphertext, 26 - key);
+    }
 
     public String getId() {
         return id;
@@ -29,10 +47,11 @@ public class JenkinsTokenModel {
     }
 
     public String getToken() {
-        return token;
+        return decrypt(token,3);
     }
 
     public void setToken(String token) {
         this.token = token;
+
     }
 }

@@ -38,7 +38,18 @@ public class ResourceLocking {
     @Autowired
     ExpireLockNotificationModel expireLockNotificationModel;
 
+    @Autowired
+    SendMention sendMention;
 
+
+    /**
+     * used to lock resource by user
+     * @param resource  resource name
+     * @param hourString time in hour
+     * @param minuteString time in minutes
+     * @param turnContext tunrcontext
+     * @return return a string is locked resources
+     */
 
     public synchronized String LockResource(String resource,String hourString,String minuteString, TurnContext turnContext) {
         if(resourceRepository.findByResourcename(resource)==null)return "Resource not found";
@@ -65,7 +76,8 @@ public class ResourceLocking {
         LockedResourceModel lockedResource=lockedResourceRepo.findByResource(resource);
           if(lockedResource!=null) {
              sendNotification.notify(useremail,resource,minutes);
-              return "resource is already locked by : "+lockedResource.getUseremail()+" ForTime : "+convertUTCToIST.getIST(lockedResourceRepo.findByResource(resource).getExpiretime());
+
+              return "resource is already locked by : "+lockedResource.getUseremail()+" Till : "+convertUTCToIST.getIST(lockedResourceRepo.findByResource(resource).getExpiretime());
           }
 
             LocalDateTime currenttime=LocalDateTime.now();
@@ -86,15 +98,18 @@ public class ResourceLocking {
         return "command not found";
     }
 
+    /**
+     *this function is used to unlock the user lock resourcr
+     */
     public synchronized String UnlockResource(String resource,TurnContext turnContext) {
         // Acquire the lock
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
         String useremail=teamsAcc.getEmail();
         if(useremail==null)useremail="test@sprinklr.com";
-
+         if(resourceRepository.findByResourcename(resource)==null)return "Resource not found";
         LockedResourceModel lockedResource=lockedResourceRepo.findByResource(resource);
-        if(lockedResource==null)return "Resource not found";
+        if(lockedResource==null)return "Resource is already unlock";
         if( lockedResource.getUseremail().equals(useremail)){
             lockedResourceRepo.deleteById(lockedResource.getId());
             return "resource unlocked successfully";

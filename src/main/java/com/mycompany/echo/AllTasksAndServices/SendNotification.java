@@ -25,6 +25,14 @@ public class SendNotification {
     @Autowired
     AllContext allContext;
 
+    /**
+     * used to send notification to user
+     * @param senderemail senderemail
+     * @param resource resource name
+     * @param time time
+     * @return return string
+     */
+
     public String notify(String senderemail, String resource, Long time) {
 
         if (resourceRepository.findByResourcename(resource) == null) return "Resource does not exist";

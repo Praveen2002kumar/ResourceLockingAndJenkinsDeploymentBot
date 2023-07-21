@@ -2,7 +2,7 @@
   "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.14/MicrosoftTeams.schema.json",
   "manifestVersion": "1.14",
   "version": "1.0.1",
-  "id": "23b3b230-43c3-497c-a7af-70fd68b15395",
+  "id": "cf0f42ad-dae5-45d6-b179-857195ddad9e",
   "packageName": "com.sprinklr.chatbot",
   "developer": {
     "name": "Praveen Kumar",
@@ -15,7 +15,7 @@
     "outline": "outline.png"
   },
   "name": {
-    "short": "JenkinsDeployment",
+    "short": "JenkinsBOT",
     "full": "code alert bot"
   },
   "description": {
@@ -25,7 +25,7 @@
   "accentColor": "#FFFFFF",
   "bots": [
     {
-      "botId": "23b3b230-43c3-497c-a7af-70fd68b15395",
+      "botId": "cf0f42ad-dae5-45d6-b179-857195ddad9e",
       "scopes": [
         "personal",
         "team",

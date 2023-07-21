@@ -10,11 +10,13 @@ import com.microsoft.bot.builder.TurnContext;
 import com.microsoft.bot.schema.Activity;
 import com.microsoft.bot.schema.ActivityTypes;
 import com.microsoft.bot.schema.ChannelAccount;
+import com.microsoft.bot.schema.Mention;
 import com.mycompany.echo.AllRepositories.ResourceRepository;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.concurrent.CompletableFuture;
@@ -85,19 +87,20 @@ public class EchoBot extends ActivityHandler {
     @Autowired
     AddTokenForm addTokenForm;
 
+    @Autowired
+    ResourceAvailibility resourceAvailibility;
+
     @Override
     protected CompletableFuture<Void> onMessageActivity(TurnContext turnContext) {
 
         consumeContext.getConsume(turnContext);
 
-        String messageToUser = "help : all commands";
+        String messageToUser = "command not found use : all commands";
         if (turnContext.getActivity().isType(ActivityTypes.MESSAGE) && turnContext.getActivity().getText() == null) {
             messageToUser = receiveBuildParameters.getReceive(turnContext);
             Activity reply = MessageFactory.text(messageToUser);
             return turnContext.sendActivity(reply).thenApply(resourceResponse -> null);
         }
-
-
 
         String input = turnContext.getActivity().getText();
         StringTokenizer tokenizer = new StringTokenizer(input);
@@ -107,15 +110,13 @@ public class EchoBot extends ActivityHandler {
             String token = tokenizer.nextToken();
             userInput.add(token);
         }
-//        String activityText = turnContext.getActivity().getText();
-//        String[] words = activityText.split("\\s+");
-//
-//        List<String> userInput = Arrays.asList(words);
+
 
 
         try {
             if (userInput.get(0).equals("hi")) {
-                messageToUser = "Hi! " + turnContext.getActivity().getFrom().getName();
+                messageToUser = "**Hi "+turnContext.getActivity().getFrom().getName()+"!**";
+
             } else if (userInput.get(0).equals("all") && userInput.get(1).equals("resources")) {
                 messageToUser = allResources.getAllResources();
             } else if (userInput.get(0).equals("add") && userInput.get(1).equals("resource")) {
@@ -154,6 +155,8 @@ public class EchoBot extends ActivityHandler {
             } else if (userInput.get(0).equals("add") && userInput.get(1).equals("token")) {
                 addTokenForm.getForm(turnContext);
                 messageToUser = "fill token value";
+            }else if(userInput.get(0).equals("resource")&& userInput.get(1).equals("status")){
+                messageToUser=resourceAvailibility.getCheck(userInput.get(2));
             }
         } catch (IndexOutOfBoundsException | NullPointerException e) {
             System.out.println(e);
@@ -162,9 +165,17 @@ public class EchoBot extends ActivityHandler {
         }
 
 
-        return turnContext.sendActivity(
-                MessageFactory.text(messageToUser)
-        ).thenApply(sendResult -> null);
+           return turnContext.sendActivity(
+
+                   MessageFactory.text(messageToUser)
+           ).thenApply(sendResult -> null);
+
+    }
+
+    public  void sendMentionMessage(TurnContext turnContext, String messageToUser, Mention mention){
+        Activity replyActivity = MessageFactory.text(messageToUser);
+        replyActivity.setMentions(Collections.singletonList(mention));
+        turnContext.sendActivity(replyActivity).thenApply(resourceResponse -> null);
     }
 
     @Override

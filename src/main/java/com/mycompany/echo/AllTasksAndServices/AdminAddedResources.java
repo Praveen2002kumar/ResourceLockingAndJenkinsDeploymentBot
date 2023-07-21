@@ -23,13 +23,18 @@ public class AdminAddedResources {
     ResourceAdminRepository resourceAdminRepository;
 
 
-
-    public String addResource(String resource, TurnContext turnContext){
+    /**
+     * this is used to add resources by admin
+     * @param resource resource to be added
+     * @param turnContext turncontext of admin
+     * @return return string if resource addess or not
+     */
+    public String addResource(String resource, TurnContext turnContext) {
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
-        String userEmail=teamsAcc.getEmail();
-        boolean admin=resourceAdminRepository.existsByEmail(userEmail);
-        if(!admin)return "Only admin can add the resources";
+        String userEmail = teamsAcc.getEmail();
+        boolean admin = resourceAdminRepository.existsByEmail(userEmail);
+        if (!admin) return "Only admin can add the resources";
         if (resourceRepository.findByResourcename(resource) != null) {
             resourceRepository.deleteById(resourceRepository.findByResourcename(resource).getId());
 
@@ -38,6 +43,6 @@ public class AdminAddedResources {
         resourceModel.setEmail(userEmail);
         resourceModel.setResourcename(resource);
         resourceRepository.save(resourceModel);
-        return  "Resource added successfully";
+        return "Resource added successfully";
     }
 }

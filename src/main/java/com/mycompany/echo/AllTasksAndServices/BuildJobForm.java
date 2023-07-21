@@ -14,8 +14,11 @@ import java.util.Map;
 
 @Component
 public class BuildJobForm {
+    /**
+    *Build job form to access job parameters using form
+     */
     private String getAdaptiveCardJson() {
-        String adaptiveCardJson=  "{\n" +
+        String adaptiveCardJson = "{\n" +
                 "  \"type\": \"AdaptiveCard\",\n" +
                 "  \"body\": [\n" +
                 "    {\n" +
@@ -63,7 +66,8 @@ public class BuildJobForm {
         return adaptiveCardJson;
 
     }
-    public void getForm(TurnContext turnContext){
+
+    public void getForm(TurnContext turnContext) {
         Attachment cardAttachment = new Attachment();
         cardAttachment.setContentType("application/vnd.microsoft.card.adaptive");
         try {
@@ -80,6 +84,6 @@ public class BuildJobForm {
         reply.setChannelData(channelData);
 
         // Send the reply
-         turnContext.sendActivity(reply).thenApply(resourceResponse -> null);
+        turnContext.sendActivity(reply).thenApply(resourceResponse -> null);
     }
 }

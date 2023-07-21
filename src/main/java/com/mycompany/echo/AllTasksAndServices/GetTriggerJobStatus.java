@@ -5,7 +5,6 @@ import com.mycompany.echo.AllModels.AllContext;
 import com.mycompany.echo.AllModels.TriggerJobModel;
 import com.mycompany.echo.AllRepositories.JenkinsTokenRepo;
 import com.mycompany.echo.AllRepositories.TriggerJobRepo;
-import com.mycompany.echo.AllRepositories.UserBuildJobRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,9 +28,9 @@ public class GetTriggerJobStatus {
     @Autowired
     JenkinsTokenRepo jenkinsTokenRepo;
 
-    @Autowired
-    UserBuildJobRepo userBuildJobRepo;
-
+    /**
+     * this function is user to send trigger job status
+     */
     @Scheduled(fixedDelay = 5000)
     public void Status(){
         List<TriggerJobModel> triggerJobs=triggerJobRepo.findAll();

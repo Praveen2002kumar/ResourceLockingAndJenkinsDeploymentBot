@@ -10,8 +10,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class AlertCard {
 
+    /**
+     * this is alert card
+     * @param heading heading of card
+     * @param text text of card
+     * @param turnContext turncontext of user
+     */
 
-    public void showAlert(String heading,String text,TurnContext turnContext){
+    public void showAlert(String heading, String text, TurnContext turnContext) {
+
 
         HeroCard card = new HeroCard();
 
@@ -25,6 +32,7 @@ public class AlertCard {
         cardAttachment.setContent(card);
 
         Activity reply = MessageFactory.attachment(cardAttachment);
+
 
         turnContext.sendActivity(reply).join();
 

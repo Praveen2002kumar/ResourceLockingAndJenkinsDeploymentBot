@@ -26,32 +26,35 @@ public class BeforeExpireNotification {
     @Autowired
     ConvertUTCToIST convertUTCToIST;
 
+    /**
+     * send the notification to user about their lock expiry
+     */
     @Scheduled(fixedDelay = 5000)
-      public void expireLockNotify(){
-            try {
-                List<ExpireLockNotificationModel> lockedResources = expireLockNotificationRepo.findAll();
-                for (ExpireLockNotificationModel lockedResourceModel : lockedResources) {
+    public void expireLockNotify() {
+        try {
+            List<ExpireLockNotificationModel> lockedResources = expireLockNotificationRepo.findAll();
+            for (ExpireLockNotificationModel lockedResourceModel : lockedResources) {
 
-                    LocalDateTime time = lockedResourceModel.getExpiretime();
-                    if (time == null) time = LocalDateTime.now();
-                    LocalDateTime fiveMinuteAfterCurrentTime = LocalDateTime.now().plusMinutes(5);
-                    if (time.isBefore(fiveMinuteAfterCurrentTime)) {
+                LocalDateTime time = lockedResourceModel.getExpiretime();
+                if (time == null) time = LocalDateTime.now();
+                LocalDateTime fiveMinuteAfterCurrentTime = LocalDateTime.now().plusMinutes(5);
+                if (time.isBefore(fiveMinuteAfterCurrentTime)) {
 
 
-                        String text = "Your lock for resource : " + lockedResourceModel.getResource() + " will expired at : " + convertUTCToIST.getIST(lockedResourceModel.getExpiretime());
+                    String text = "Your lock for resource : " + lockedResourceModel.getResource() + " will expired at : " + convertUTCToIST.getIST(lockedResourceModel.getExpiretime());
 
-                        String ownerEmail = lockedResourceModel.getUseremail();
-                        List<TurnContext> contexts = allContext.getContext(ownerEmail);
-                        for (TurnContext context : contexts) {
-                            alertCard.showAlert("🚨🚨🚨🚨Expire Alert", text, context);
-                        }
-                        expireLockNotificationRepo.deleteById(lockedResourceModel.getId());
-
+                    String ownerEmail = lockedResourceModel.getUseremail();
+                    List<TurnContext> contexts = allContext.getContext(ownerEmail);
+                    for (TurnContext context : contexts) {
+                        alertCard.showAlert("🚨🚨🚨Expire Alert", text, context);
                     }
-                }
-            } catch (NullPointerException e) {
-                System.out.println(e);
-            }
+                    expireLockNotificationRepo.deleteById(lockedResourceModel.getId());
 
-       }
+                }
+            }
+        } catch (NullPointerException e) {
+            System.out.println(e);
+        }
+
+    }
 }

@@ -15,6 +15,13 @@ public class RemoveResource {
     ResourceAdminRepository resourceAdminRepository;
     @Autowired
     ResourceRepository resourceRepository;
+
+    /**
+     * removes the resources added by admin
+     * @param resource resource name
+     * @param turnContext turncontext of admin
+     * @return return a string
+     */
     public String getRemove(String resource, TurnContext turnContext){
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();

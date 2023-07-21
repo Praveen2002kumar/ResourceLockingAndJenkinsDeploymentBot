@@ -10,11 +10,17 @@ import java.util.Base64;
 @Component
 public class BuildNumberByQueueId {
 
+    /**
+     * to get build number of any job
+     * @param queueId  queue id of that job
+     * @param jobName   job name
+     * @param username   username at jenkins
+     * @param password  password at jenkins
+     * @return   return buildnumber
+     * @throws Exception null pointer exception
+     */
     public long getBuildNumber(String queueId, String jobName, String username, String password) throws Exception {
         String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins/";
-
-
-//        String jenkinsUrl = "https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app/";
 
 
         RestTemplate restTemplate = new RestTemplate();

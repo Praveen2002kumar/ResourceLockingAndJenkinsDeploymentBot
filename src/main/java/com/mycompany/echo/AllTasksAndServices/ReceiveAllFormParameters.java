@@ -23,6 +23,11 @@ public class ReceiveAllFormParameters {
     ResourceLocking resourceLocking;
 
 
+    /**
+     * to receive all form parmaeters
+     * @param turnContext turncontext
+     * @return reutrn a string
+     */
     public String getReceive(TurnContext turnContext) {
         String message= "FAILED";
         if (turnContext.getActivity().getValue() != null) {
@@ -49,6 +54,8 @@ public class ReceiveAllFormParameters {
                    String resource=(String)mapData.get("resource");
                    String hour=(String)mapData.get("hour");
                    String minute=(String)mapData.get("minute");
+                   if(hour==null)hour="0";
+                   if(minute==null)minute="0";
                   message=exchangeLock.getExchange(useremail,resource,turnContext,hour,minute);
                   
 

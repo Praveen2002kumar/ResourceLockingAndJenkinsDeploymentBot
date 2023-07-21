@@ -14,6 +14,11 @@ public class ConsumeContext {
     AllContext allContext;
 
     List<String> recipientIds=new ArrayList<>();
+
+    /**
+     * this is used to store turncontext of user maped with their email id
+     * @param turnContext turncontext of that user
+     */
     public  void getConsume(TurnContext turnContext){
         if(!recipientIds.contains(turnContext.getActivity().getFrom().getId())){
             allContext.setContext(turnContext);

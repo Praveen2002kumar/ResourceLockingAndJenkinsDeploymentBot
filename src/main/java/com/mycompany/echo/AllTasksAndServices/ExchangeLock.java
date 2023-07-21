@@ -40,6 +40,15 @@ public class ExchangeLock {
     @Autowired
     ConvertUTCToIST convertUTCToIST;
 
+    /**
+     * this is used by lock ownwer to grant lock to user
+     * @param senderemail  emial id to user
+     * @param resource  resource name
+     * @param turnContext turncontext of user
+     * @param hourString  time in hour
+     * @param minuteString time in minutes
+     * @return  return string if added or not
+     */
     public String getExchange(String senderemail, String resource, TurnContext turnContext, String hourString,String minuteString) {
         long time;
         long hour;
@@ -54,9 +63,10 @@ public class ExchangeLock {
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
         String useremail = teamsAcc.getEmail();
+        if(useremail==null)useremail="test@sprinklr.com";
         List<TurnContext> list = allContext.getContext(senderemail);
 
-        if(lockedResourceRepo.findByResource(resource) == null)return "You have not lock of this resource";
+        if(lockedResourceRepo.findByResource(resource) == null)return "Resource is already unlock";
         System.out.println(lockedResourceRepo.findByResource(resource).getUseremail()+useremail);
 
 
@@ -72,7 +82,7 @@ public class ExchangeLock {
            expireLockNotificationModel.setResource(resource);
            expireLockNotificationRepo.save(expireLockNotificationModel);
            for (TurnContext context : list) {
-               alertCard.showAlert("🔔🔔🔔🔔Notification", "Lock for resource : " + lockedResourceModel.getResource() + " has been granted to you , Expire at : "+convertUTCToIST.getIST(LocalDateTime.now().plusMinutes(time)), context);
+               alertCard.showAlert("🔔🔔🔔🔔Notification", "Lock for resource : " +lockedResourceModel.getResource() + " has been granted to you , Expire at : "+convertUTCToIST.getIST(LocalDateTime.now().plusMinutes(time)), context);
            }
            return "Successfully granted lock to : " + senderemail;
        }

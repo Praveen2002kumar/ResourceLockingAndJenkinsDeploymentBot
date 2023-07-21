@@ -22,22 +22,26 @@ public class StatusWithBuildNumber {
 
     @Autowired
     AlertCard alertCard;
+
+    /**
+     * to get status with buildnumber using jobname and buildnumber
+     * @param jobName jobname
+     * @param buildNumber buildnumber
+     * @param turnContext turncontext
+     * @return return status of that job
+     */
     public String getStatus(String jobName, String buildNumber, TurnContext turnContext){
         ChannelAccount sentBy = turnContext.getActivity().getFrom();
         TeamsChannelAccount teamsAcc = TeamsInfo.getMember(turnContext, sentBy.getId()).join();
         String userEmail = teamsAcc.getEmail();
         String jenkinsUrl="https://qa4-build.sprinklr.com/jenkins";
-//        String username="praveen.kumar@sprinklr.com";
-//        String password="1120ed4c398b26347643d298081be50185";
 
-//        String jenkinsUrl = "http://localhost:8080";
-//        String jenkinsUrl="https://81fb-2400-80c0-3001-12fd-00-1.ngrok-free.app";
-//
+
         String username = userEmail;
 //
         if(jenkinsTokenRepo.findByEmail(username)==null)return "Access token not found use command : add token tokenvalue";
         String password = jenkinsTokenRepo.findByEmail(username).getToken();
-//
+
 
 
        try{
@@ -59,7 +63,7 @@ public class StatusWithBuildNumber {
            if(statusResponse.getBody().contains("\"inProgress\":true"))buildStatus="In Progress";
 
            alertCard.showAlert("🔔🔔Job Status",buildStatus+" : "+jobName,turnContext);
-           return buildStatus+" : "+jobName;
+           return buildStatus+" : "+jobName+" , "+buildNumber;
        }catch (HttpClientErrorException e){
            System.out.println(e);
        }
